@@ -1,0 +1,15 @@
+export { default as Bell } from "./Bell";
+export { default as ChartPie } from "./ChartPie";
+export { default as ClipboardList } from "./ClipboardList";
+export { default as Collection } from "./Collection";
+export { default as DocumentReport } from "./DocumentReport";
+export { default as DoubleGear } from "./DoubleGear";
+export { default as InboxIn } from "./InboxIn";
+export { default as LockClosed } from "./LockClosed";
+export { default as Logo } from "./Logo";
+export { default as Menu } from "./Menu";
+export { default as Padlock } from "./Padlock";
+export { default as Profile } from "./Profile";
+export { default as Search } from "./Search";
+export { default as ShoppingBag } from "./ShoppingBag";
+export { default as Support } from "./Support";
