@@ -82,13 +82,13 @@ export default function Onboarding() {
   );
 }
 
-export const clientAction = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-  const role = formData.get("role");
+// export const clientAction = async ({ request }: { request: Request }) => {
+//   const formData = await request.formData();
+//   const role = formData.get("role");
 
-  if (!role) {
-    return
-  }
+//   if (!role) {
+//     return
+//   }
 
   // const { data: response, error } = await tryCatch(api.post<User>("/api/auth/login-with-role", {
   //   role
@@ -103,5 +103,5 @@ export const clientAction = async ({ request }: { request: Request }) => {
   // localStorage.setItem("userId", user.id);
   // queryClient.setQueryData(userKeys.currentUser(), user);
 
-  return redirect("/dashboard");
-}
+//   return redirect("/dashboard");
+// }

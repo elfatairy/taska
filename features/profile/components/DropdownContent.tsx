@@ -1,3 +1,5 @@
+'use client';
+
 import { BadgeCheck, LogOut } from "lucide-react";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
