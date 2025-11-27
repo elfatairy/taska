@@ -9,6 +9,7 @@
  */
 
 import type * as account from "../account.js";
+import type * as user from "../user.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   account: typeof account;
+  user: typeof user;
 }>;
 
 /**

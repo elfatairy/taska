@@ -1,0 +1,1 @@
+export const ACCOUNT_COOKIE_NAME = 'taska-account-token';

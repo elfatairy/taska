@@ -1,16 +1,22 @@
 "use client";
 
 import { UserIcon } from "lucide-react";
-import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
-import { tryCatch } from "@/lib/try-catch";
 import { cn } from "@/lib/utils";
+import { api } from "@/convex/_generated/api";
+import { useAction } from "convex/react";
+import { use } from "react";
+import { Doc } from "@/convex/_generated/dataModel";
+import { useClerk, useSignIn } from "@clerk/nextjs";
+import { tryCatch } from "@/lib/try-catch";
+import { useAccountAction } from "@/features/account/useAccount";
+import { redirect } from "next/navigation";
 
 type Role = {
   label: string;
-  value: string;
+  value: 'CTO' | 'Product Manager' | 'Team Lead' | 'Developer';
   icon: React.ReactNode;
   locked?: boolean;
 }
@@ -42,17 +48,37 @@ const roles: Role[] = [
 ]
 
 export default function Onboarding() {
-  const handleRoleClick = (role: Role) => {
+  const loginWithRole = useAccountAction(api.user.loginWithRole);
+  const { signIn, isLoaded } = useSignIn();
+  const { setActive } = useClerk();
+
+  const handleRoleClick = async (role: typeof roles[number]) => {
+    if (!isLoaded) return;
+
     if (role.locked) {
       toast.info("This role is still under development, check back later to use it");
       return;
     }
 
-    // fetcher.submit({
-    //   role: role.value,
-    // }, {
-    //   method: "post"
-    // });
+    const token = await loginWithRole({
+      role: role.value
+    });
+
+    const { data: result, error } = await tryCatch(signIn.create({
+      strategy: "ticket",
+      ticket: token,
+    }));
+
+    if (error) {
+      console.error(error);
+      toast.error("Failed to login");
+      return;
+    }
+
+    if (result.status === "complete") {
+      await setActive({ session: result.createdSessionId });
+      redirect("/dashboard");
+    }
   }
 
   return (
@@ -90,18 +116,18 @@ export default function Onboarding() {
 //     return
 //   }
 
-  // const { data: response, error } = await tryCatch(api.post<User>("/api/auth/login-with-role", {
-  //   role
-  // }));
+// const { data: response, error } = await tryCatch(api.post<User>("/api/auth/login-with-role", {
+//   role
+// }));
 
-  // if (error) {
-  //   return toast.error("Failed to login");
-  // }
+// if (error) {
+//   return toast.error("Failed to login");
+// }
 
-  // const user = response.data;
+// const user = response.data;
 
-  // localStorage.setItem("userId", user.id);
-  // queryClient.setQueryData(userKeys.currentUser(), user);
+// localStorage.setItem("userId", user.id);
+// queryClient.setQueryData(userKeys.currentUser(), user);
 
 //   return redirect("/dashboard");
 // }
