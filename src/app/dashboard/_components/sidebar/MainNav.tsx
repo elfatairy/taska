@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuAction, SidebarMenuItem, SidebarMenuSub as SidebarMenuSubBase,  SidebarMenuSubItem } from "@/components/ui/sidebar"
-import { SidebarMenuSubButton, SidebarMenuButton } from "@/app/dashboard/_components/sidebar/sidebarNavLink"
+import { SidebarMenuSubButton, SidebarMenuButton } from "@/app/dashboard/_components/sidebar/SidebarNavLink"
 import type { Route } from "@/app/dashboard/_components/sidebar/types"
 
 export const mainRoutes: Route[] = [

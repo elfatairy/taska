@@ -1,9 +1,9 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { convexClient } from "./lib/convex-client"
-import { api } from "./convex/_generated/api"
-import { ACCOUNT_COOKIE_NAME } from './lib/constants'
+import { convexClient } from "@/lib/convex-client"
+import { api } from "@convex/_generated/api"
+import { ACCOUNT_COOKIE_NAME } from "@/lib/constants"
 
 export default clerkMiddleware(async () => {
   const response = NextResponse.next()

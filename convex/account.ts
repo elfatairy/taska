@@ -1,11 +1,11 @@
-import { action, internalMutation, internalQuery, mutation } from "./_generated/server";
+import { action, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { initializeUsers } from "./user";
 import { internal } from "./_generated/api";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 
-export const acountExists = internalQuery({
+export const getAccountByTokenIdentifier = internalQuery({
   args: {
     tokenIdentifier: v.string(),
   },
@@ -32,7 +32,7 @@ export const initializeAccount = action({
   },
 
   handler: async (ctx, args) => {
-    const accountExists = await ctx.runQuery(internal.account.acountExists, {
+    const accountExists = await ctx.runQuery(internal.account.getAccountByTokenIdentifier, {
       tokenIdentifier: args.tokenIdentifier,
     });
     if (accountExists) {
@@ -48,16 +48,3 @@ export const initializeAccount = action({
     return;
   },
 });
-
-export const getAccountId = internalQuery({
-  args: {
-    tokenIdentifier: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const account = await ctx.db.query("accounts").filter((q) => q.eq(q.field("tokenIdentifier"), args.tokenIdentifier)).first();
-    if (!account) {
-      return null;
-    }
-    return account._id;
-  }
-})

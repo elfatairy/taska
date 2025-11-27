@@ -5,7 +5,6 @@ import Image from "next/image";
 
 export default function UnderDevelopment() {
   return (
-
     <Empty>
       <EmptyHeader>
         <EmptyMedia>

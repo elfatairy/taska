@@ -5,7 +5,7 @@ import { Icon } from "@/components/Icon";
 import SearchBar from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
-import NotificationTrigger from "@/features/notifications/components/NotificationTrigger";
+import NotificationTrigger from "@/features/notifications/NotificationTrigger";
 import ProfileHeaderTrigger from "@/features/profile/HeaderTrigger";
 
 export function DashboardHeader() {

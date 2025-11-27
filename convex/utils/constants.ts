@@ -1,0 +1,1 @@
+export const INITIAL_USERS_PASSWORD = "2<.QT8h^4-AH";

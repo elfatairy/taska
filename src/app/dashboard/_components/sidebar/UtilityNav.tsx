@@ -1,5 +1,5 @@
 import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
-import { SidebarMenuButton } from "@/app/dashboard/_components/sidebar/sidebarNavLink"
+import { SidebarMenuButton } from "@/app/dashboard/_components/sidebar/SidebarNavLink"
 import type { Route } from "@/app/dashboard/_components/sidebar/types"
 
 const utilityRoutes: Route[] = [

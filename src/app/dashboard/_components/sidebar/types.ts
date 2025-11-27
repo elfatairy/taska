@@ -1,4 +1,4 @@
-import type { IconType } from "~/types/icon-type";
+import type { IconType } from "@/types/icon-type";
 
 export type Route = {
   label: string;
