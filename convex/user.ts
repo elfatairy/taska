@@ -1,6 +1,7 @@
 import {
   ActionCtx,
   internalMutation,
+  internalQuery,
 } from "./_generated/server";
 import { fakerEN } from "@faker-js/faker";
 import { internal } from "./_generated/api";
@@ -9,7 +10,10 @@ import { v } from "convex/values";
 import { vUserRole } from "./schema";
 import { createClerkUser } from "./services/clerk";
 
-function randomUser(): Omit<Doc<"users">, "_id" | "_creationTime" | "accountId" | "clerkUserId"> {
+function randomUser(): Omit<
+  Doc<"users">,
+  "_id" | "_creationTime" | "accountId" | "clerkUserId"
+> {
   const firstName = fakerEN.person.firstName();
   const lastName = fakerEN.person.lastName();
   return {
@@ -31,6 +35,27 @@ function randomUser(): Omit<Doc<"users">, "_id" | "_creationTime" | "accountId" 
     isOnline: fakerEN.datatype.boolean(),
   };
 }
+
+export const getUsersByAccountId = internalQuery({
+  args: {
+    accountId: v.id("accounts"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("accountId"), args.accountId))
+      .collect();
+  },
+});
+
+export const deleteUser = internalMutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.delete(args.userId);
+  },
+});
 
 export const createUser = internalMutation({
   args: {

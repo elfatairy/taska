@@ -1,6 +1,15 @@
 import { Doc } from "../_generated/dataModel";
 import { INITIAL_USERS_PASSWORD } from "../utils/constants";
 
+export async function deleteClerkUser(clerkUserId: string) {
+  await fetch(`https://api.clerk.com/v1/users/${clerkUserId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
+    },
+  });
+}
+
 export async function createClerkUser(
   user: Omit<
     Doc<"users">,

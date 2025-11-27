@@ -1,4 +1,4 @@
-import { action, internalMutation, internalQuery } from "./_generated/server";
+import { action, internalAction, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { initializeUsers } from "./user";
 import { internal } from "./_generated/api";
@@ -48,3 +48,12 @@ export const initializeAccount = action({
     return;
   },
 });
+
+export const clearAccount = internalAction({
+  args: {
+    accountId: v.id("accounts"),
+  },
+  handler: async (ctx, args) => {
+    
+  },
+})
