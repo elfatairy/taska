@@ -28,7 +28,7 @@ const roles: Role[] = [
   }
 ]
 
-export default function Onboarding() {
+export default async function Onboarding() {
   return (
     <div className="w-screen h-screen bg-background text-foreground flex flex-col items-center justify-center px-1">
       <div className="bg-card py-8 px-2 sm:px-8 rounded-lg border shadow-sm max-w-md">

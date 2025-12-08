@@ -1,11 +1,24 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { auth, clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { cookies } from "next/headers"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { convexClient } from "@/lib/convex-client"
 import { api } from "@convex/_generated/api"
 import { ACCOUNT_COOKIE_NAME } from "@/lib/constants"
 
-export default clerkMiddleware(async () => {
+const isAuthenticatedRoutes = createRouteMatcher(['/dashboard(.*)', '/forum(.*)'])
+const unauthenticatedRoutes = ['/login', '/onboarding', '/']
+
+export default clerkMiddleware(async (_auth: typeof auth, request: NextRequest) => {
+  const { userId } = await _auth()
+
+  if (isAuthenticatedRoutes(request) && !userId) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+  
+  if (unauthenticatedRoutes.includes(request.nextUrl.pathname) && userId) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
   const response = NextResponse.next()
   
   const cookieName = ACCOUNT_COOKIE_NAME

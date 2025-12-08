@@ -1,20 +1,33 @@
 'use client';
 
 import { BadgeCheck, LogOut } from "lucide-react";
-import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { useWithLoading } from "@/hooks/useWithLoading";
+import { tryCatch } from "@/lib/try-catch";
 
 export function ProfileDropdownContent() {
+  const { isLoading, runWithLoading } = useWithLoading();
   const { user } = useUser();
   const { signOut } = useAuth();
 
-  const handleLogout = async () => {
-    await signOut();
-    redirect("/login");
+  const handleLogout = (e: Event) => {
+    e.preventDefault();
+
+    runWithLoading(async () => {
+      const { error } = await tryCatch(signOut({
+        redirectUrl: "/login",
+      }));
+
+      if (error) {
+        console.error("Logout error:", error);
+        toast.error("Failed to log out. Please try again.");
+        return;
+      }
+    });
   };
 
   if (!user) return null;
@@ -56,9 +69,9 @@ export function ProfileDropdownContent() {
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={handleLogout}>
+      <DropdownMenuItem onSelect={handleLogout}>
         <LogOut />
-        Log out
+        {isLoading ? "Logging out..." : "Log out"}
       </DropdownMenuItem>
     </DropdownMenuContent>
   )
