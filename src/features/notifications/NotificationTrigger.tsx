@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
+import { featureUnderDevelopment } from "@/lib/utils";
 
 export default function NotificationTrigger() {
   return (
@@ -12,7 +13,7 @@ export default function NotificationTrigger() {
       className="flex"
       aria-label="Open Notifications Menu"
       onClick={() => {
-        toast.info("Notifications are still under development");
+        featureUnderDevelopment();
       }}
     >
       <Icon icon='Bell' className="text-foreground stroke-0 size-5" aria-hidden="true" />

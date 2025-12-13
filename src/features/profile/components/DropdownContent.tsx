@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useWithLoading } from "@/hooks/useWithLoading";
 import { tryCatch } from "@/lib/try-catch";
+import { featureUnderDevelopment } from "@/lib/utils";
 
 export function ProfileDropdownContent() {
   const { isLoading, runWithLoading } = useWithLoading();
@@ -62,7 +63,7 @@ export function ProfileDropdownContent() {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={() => {
-          toast.info("Account is still under development");
+          featureUnderDevelopment();
         }}>
           <BadgeCheck />
           Account

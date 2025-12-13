@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { tryCatch } from "@/lib/try-catch";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icon";
-import { cn } from "@/lib/utils";
+import { cn, featureUnderDevelopment } from "@/lib/utils";
 import { Role } from "../types";
 
 export default function OnboardingCard({ role }: { role: Role }) {
@@ -27,7 +27,7 @@ export default function OnboardingCard({ role }: { role: Role }) {
     }
 
     if (role.locked) {
-      toast.info("This role is still under development, check back later to use it");
+      featureUnderDevelopment();
       return;
     }
 

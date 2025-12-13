@@ -2,11 +2,12 @@ import {
   ActionCtx,
   internalMutation,
   internalQuery,
+  query,
 } from "./_generated/server";
 import { fakerEN } from "@faker-js/faker";
 import { internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { vUserRole } from "./schema";
 import { createClerkUser } from "./services/clerk";
 
@@ -45,6 +46,24 @@ export const getUsersByAccountId = internalQuery({
       .query("users")
       .filter((q) => q.eq(q.field("accountId"), args.accountId))
       .collect();
+  },
+});
+
+export const getUsers = query({
+  args: {
+    tokenIdentifier: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const account = await ctx.runQuery(internal.account.getAccountByTokenIdentifier, {
+      tokenIdentifier: args.tokenIdentifier,
+    });
+    if (!account) {
+      throw new ConvexError("Account not found");
+    }
+    const users: Doc<"users">[] = await ctx.runQuery(internal.user.getUsersByAccountId, {
+      accountId: account._id,
+    });
+    return users;
   },
 });
 
