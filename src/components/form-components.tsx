@@ -9,13 +9,14 @@ import { ComboboxProps } from '@/components/ui/combobox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Combobox as ShadcnCombobox } from '@/components/ui/combobox'
 import { Checkbox as ShadcnCheckbox } from '@/components/ui/checkbox'
+import { cn } from '@/lib/utils'
 
-export function SubscribeButton({ label, loadingLabel, icon }: { label: string, loadingLabel?: string, icon?: React.ReactNode }) {
+export function SubscribeButton({ label, loadingLabel, icon, className }: { label: string, loadingLabel?: string, icon?: React.ReactNode, className?: string }) {
   const form = useFormContext()
   return (
     <form.Subscribe selector={(state) => state.isSubmitting}>
       {(isSubmitting) => (
-        <Button type="submit" disabled={isSubmitting} className="relative font-bold">
+        <Button type="submit" disabled={isSubmitting} className={cn("relative font-bold", className)}>
           {isSubmitting ? loadingLabel || label : label}
           {icon}
         </Button>
@@ -48,11 +49,13 @@ export function TextField({
   placeholder,
   disabled,
   autoComplete,
+  type,
 }: {
   label?: string
   placeholder?: string
   disabled?: boolean
   autoComplete?: React.ComponentProps<'input'>['autoComplete']
+  type?: React.ComponentProps<'input'>['type']
 }) {
   const field = useFieldContext<string>()
   const errors = useStore(field.store, (state) => state.meta.errors)

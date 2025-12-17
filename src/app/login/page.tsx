@@ -1,15 +1,18 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoginForm } from "./LoginForm";
 
-export default async function LoginPage() {  
+export default function LoginPage() {
   return (
-    <div>
-      <h1>Login</h1>
-      <Button asChild>
-        <Link href="/onboarding">
-          Login With Role
-        </Link>
-      </Button>
+    <div className="w-screen h-screen bg-background text-foreground flex flex-col items-center justify-center px-1">
+      <Card className="w-md">
+        <CardHeader>
+          <CardTitle>Welcome to Taska</CardTitle>
+          <CardDescription>Enter your email and password below to login to your account.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <LoginForm />
+        </CardContent>
+      </Card>
     </div>
   )
 }
