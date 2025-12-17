@@ -9,7 +9,9 @@ import { Doc } from "@convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy, MoreHorizontal } from "lucide-react"
 
-export const columns: ColumnDef<Doc<"users">>[] = [
+export type User = Doc<"users">
+
+export const usersTableColumns: ColumnDef<Doc<"users">>[] = [
   {
     accessorKey: "name_email",
     accessorFn: (row) => `${row.name} ${row.email}`,

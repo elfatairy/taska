@@ -5,21 +5,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
 import { useState } from "react"
 import { NewUser } from "./NewUser"
+import { api } from "@convex/_generated/api"
+import { useAccountQuery } from "@/features/account/useAccount"
+import { User } from "./UsersColumns"
 
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+interface UsersTableProps {
+  columns: ColumnDef<User>[]
+  initialData: User[]
 }
 
-export function UsersTable<TData, TValue>({
+export function UsersTable({
   columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+  initialData,
+}: UsersTableProps) {
+  const data = useAccountQuery(api.user.getUsers);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
-    data: data,
+    data: data || initialData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onColumnFiltersChange: setColumnFilters,

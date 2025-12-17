@@ -1,7 +1,13 @@
 "use client";
 
 import { ACCOUNT_COOKIE_NAME } from "@/lib/constants";
-import { OptionalRestArgsOrSkip, useAction, useMutation, useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import {
+  OptionalRestArgsOrSkip,
+  useAction,
+  useMutation,
+  useQuery,
+} from "convex/react";
 import { FunctionReference, OptionalRestArgs } from "convex/server";
 import { Value } from "convex/values";
 
@@ -16,18 +22,18 @@ function useAccountToken() {
     ?.split("=")[1];
 }
 
-export function useAccountQuery<Query extends FunctionReference<"query">>(
-  query: Query,
-  ...args: OptionalRestArgs<Query>
-) {
+export function useAccountQuery<
+  Query extends FunctionReference<"query">,
+  Args extends Omit<OptionalRestArgs<Query>[0], "accountToken">
+>(query: Query, args: Args = {} as Args) {
   const accountToken = useAccountToken();
 
-  const originalArgs = args[0] || {};
+  const originalArgs = args || {};
   const newArgs = (accountToken
     ? { ...originalArgs, accountToken }
-    : ("skip" as const)) as unknown as OptionalRestArgsOrSkip<Query>;
+    : ("skip" as const)) as unknown as OptionalRestArgsOrSkip<Query>[0];
 
-  return useQuery(query, ...newArgs);
+  return useQuery(query, newArgs);
 }
 
 export function useAccountMutation<
@@ -40,15 +46,15 @@ export function useAccountMutation<
     if (!accountToken) {
       throw new Error("Cannot run mutation: Account ID cookie missing.");
     }
-    
-    // @ts-expect-error: TypeScript might complain that the original type didn't 
-    return originalMutation({...args, accountToken});
+
+    // @ts-expect-error: TypeScript might complain that the original type didn't
+    return originalMutation({ ...args, accountToken });
   };
 }
 
-export function useAccountAction<
-  Action extends FunctionReference<"action">
->(action: Action) {
+export function useAccountAction<Action extends FunctionReference<"action">>(
+  action: Action
+) {
   const originalAction = useAction(action);
   const accountToken = useAccountToken();
 
@@ -57,7 +63,7 @@ export function useAccountAction<
       throw new Error("Cannot run action: Account ID cookie missing.");
     }
 
-    // @ts-expect-error: TypeScript might complain that the original type didn't 
-    return originalAction({...args, accountToken});
+    // @ts-expect-error: TypeScript might complain that the original type didn't
+    return originalAction({ ...args, accountToken });
   };
 }

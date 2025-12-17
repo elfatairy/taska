@@ -39,7 +39,7 @@ export default clerkMiddleware(async (_auth: typeof auth, request: NextRequest) 
 
   if (!existingCookie) {
     convexClient.action(api.account.initializeAccount, {
-      tokenIdentifier: valueToSet,
+      accountToken: valueToSet,
     })
   }
 

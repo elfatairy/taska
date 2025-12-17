@@ -19,8 +19,8 @@ export const getUsersByRole = internalQuery({
     accountToken: v.string(),
   },
   handler: async (ctx, args) => {
-    const account = await ctx.runQuery(internal.account.getAccountByTokenIdentifier, {
-      tokenIdentifier: args.accountToken,
+    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+      accountToken: args.accountToken,
     });
     if (!account) {
       throw new ConvexError("Account not found");

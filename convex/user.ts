@@ -1,4 +1,5 @@
 import {
+  action,
   ActionCtx,
   internalMutation,
   internalQuery,
@@ -10,6 +11,7 @@ import { Doc } from "./_generated/dataModel";
 import { ConvexError, v } from "convex/values";
 import { vUserRole } from "./schema";
 import { createClerkUser } from "./services/clerk";
+import { INITIAL_USERS_PASSWORD } from "./utils/constants";
 
 function randomUser(): Omit<
   Doc<"users">,
@@ -37,6 +39,11 @@ function randomUser(): Omit<
   };
 }
 
+function randomPassword(): string {
+  const charset = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return Array.from({ length: 8 }, () => charset[Math.floor(Math.random() * charset.length)]).join("");
+}
+
 export const getUsersByAccountId = internalQuery({
   args: {
     accountId: v.id("accounts"),
@@ -51,11 +58,11 @@ export const getUsersByAccountId = internalQuery({
 
 export const getUsers = query({
   args: {
-    tokenIdentifier: v.string(),
+    accountToken: v.string(),
   },
   handler: async (ctx, args) => {
-    const account = await ctx.runQuery(internal.account.getAccountByTokenIdentifier, {
-      tokenIdentifier: args.tokenIdentifier,
+    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+      accountToken: args.accountToken,
     });
     if (!account) {
       throw new ConvexError("Account not found");
@@ -76,7 +83,7 @@ export const deleteUser = internalMutation({
   },
 });
 
-export const createUser = internalMutation({
+export const createUserService = internalMutation({
   args: {
     accountId: v.id("accounts"),
     user: v.object({
@@ -111,12 +118,16 @@ export const initializeUsers = async (
 
   await Promise.all(
     initialUsers.map(async (user) => {
-      const clerkUserId = await createClerkUser(user);
-      await ctx.runMutation(internal.user.createUser, {
+      const { id: clerkUserId, avatarUrl } = await createClerkUser({
+        ...user,
+        password: INITIAL_USERS_PASSWORD,
+      });
+      await ctx.runMutation(internal.user.createUserService, {
         accountId: accountId,
         user: {
           ...user,
           clerkUserId: clerkUserId,
+          avatarUrl
         },
       });
     })
@@ -124,3 +135,45 @@ export const initializeUsers = async (
 
   return;
 };
+
+export const createUser = action({
+  args: {
+    accountToken: v.string(),
+    user: v.object({
+      name: v.string(),
+      email: v.string(),
+      role: vUserRole
+    }),
+  },
+  handler: async (ctx, args) => {
+    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+      accountToken: args.accountToken,
+    });
+    if (!account) {
+      throw new ConvexError("Account not found");
+    }
+
+    const password = randomPassword()
+    const user = {
+      name: args.user.name,
+      email: args.user.email,
+      role: args.user.role,
+      updatedAt: Date.now(),
+      isOnline: false,
+    };
+    const clerkUser = await createClerkUser({
+      name: args.user.name,
+      email: args.user.email,
+      password: password,
+    });
+    await ctx.runMutation(internal.user.createUserService, {
+      accountId: account._id,
+      user: {
+        ...user,
+        clerkUserId: clerkUser.id,
+        avatarUrl: clerkUser.avatarUrl,
+      },
+    });
+    return password;
+  },
+});

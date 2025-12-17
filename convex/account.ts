@@ -5,22 +5,22 @@ import { internal } from "./_generated/api";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 
-export const getAccountByTokenIdentifier = internalQuery({
+export const getAccountByToken = internalQuery({
   args: {
-    tokenIdentifier: v.string(),
+    accountToken: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.query("accounts").filter((q) => q.eq(q.field("tokenIdentifier"), args.tokenIdentifier)).first();
+    return await ctx.db.query("accounts").filter((q) => q.eq(q.field("accountToken"), args.accountToken)).first();
   }
 })
 
 export const createAccount = internalMutation({
   args: {
-    tokenIdentifier: v.string(),
+    accountToken: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("accounts", {
-      tokenIdentifier: args.tokenIdentifier,
+      accountToken: args.accountToken,
       isAnonymous: true,
     });
   }
@@ -28,19 +28,19 @@ export const createAccount = internalMutation({
 
 export const initializeAccount = action({
   args: {
-    tokenIdentifier: v.string(),
+    accountToken: v.string(),
   },
 
   handler: async (ctx, args) => {
-    const accountExists = await ctx.runQuery(internal.account.getAccountByTokenIdentifier, {
-      tokenIdentifier: args.tokenIdentifier,
+    const accountExists = await ctx.runQuery(internal.account.getAccountByToken, {
+      accountToken: args.accountToken,
     });
     if (accountExists) {
       return;
     }
 
     const accountId = await ctx.runMutation(internal.account.createAccount, {
-      tokenIdentifier: args.tokenIdentifier,
+      accountToken: args.accountToken,
     });
 
     await initializeUsers(ctx, accountId);

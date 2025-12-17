@@ -1,5 +1,4 @@
 import { Doc } from "../_generated/dataModel";
-import { INITIAL_USERS_PASSWORD } from "../utils/constants";
 
 export async function deleteClerkUser(clerkUserId: string) {
   await fetch(`https://api.clerk.com/v1/users/${clerkUserId}`, {
@@ -11,10 +10,13 @@ export async function deleteClerkUser(clerkUserId: string) {
 }
 
 export async function createClerkUser(
-  user: Omit<
+  user: Pick<
     Doc<"users">,
-    "_id" | "_creationTime" | "accountId" | "clerkUserId"
-  >
+    "name" | "email"
+  > & {
+    avatarUrl?: string;
+    password?: string;
+  }
 ) {
   const response = await fetch("https://api.clerk.com/v1/users", {
     method: "POST",
@@ -26,7 +28,7 @@ export async function createClerkUser(
       first_name: user.name.split(" ")[0],
       last_name: user.name.split(" ")[1],
       email_address: [user.email],
-      password: INITIAL_USERS_PASSWORD,
+      password: user.password,
     }),
   });
   if (!response.ok) {
@@ -34,35 +36,40 @@ export async function createClerkUser(
   }
   const clerkUser = await response.json();
 
-  const imageResponse = await fetch(user.avatarUrl);
-  if (!imageResponse.ok) {
-    throw new Error(
-      `Failed to fetch avatar image: ${imageResponse.statusText}`
-    );
-  }
-
-  const imageBlob = await imageResponse.blob();
-  const formData = new FormData();
-  formData.append("file", imageBlob);
-
-  const uploadResponse = await fetch(
-    `https://api.clerk.com/v1/users/${clerkUser.id}/profile_image`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
-      },
-      body: formData,
+  if (user.avatarUrl) {
+    const imageResponse = await fetch(user.avatarUrl);
+    if (!imageResponse.ok) {
+      throw new Error(
+        `Failed to fetch avatar image: ${imageResponse.statusText}`
+      );
     }
-  );
 
-  if (!uploadResponse.ok) {
-    throw new Error(
-      `Failed to upload profile image: ${uploadResponse.statusText}`
+    const imageBlob = await imageResponse.blob();
+    const formData = new FormData();
+    formData.append("file", imageBlob);
+
+    const uploadResponse = await fetch(
+      `https://api.clerk.com/v1/users/${clerkUser.id}/profile_image`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
+        },
+        body: formData,
+      }
     );
+
+    if (!uploadResponse.ok) {
+      throw new Error(
+        `Failed to upload profile image: ${uploadResponse.statusText}`
+      );
+    }
   }
 
-  return clerkUser.id;
+  return {
+    id: clerkUser.id,
+    avatarUrl: clerkUser.image_url,
+  };
 }
 
 export async function createSignInToken(userId: string) {

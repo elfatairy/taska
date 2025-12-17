@@ -1,4 +1,4 @@
-import { columns } from "./UsersColumns";
+import { usersTableColumns } from "./UsersColumns";
 import { UsersTable } from "./UsersTable";
 import { convexQuery } from "@/lib/convex-client";
 import { api } from "@convex/_generated/api";
@@ -9,7 +9,7 @@ export default async function UsersPage() {
   return (
     <div className="space-y-4 p-4">
       <div className="flex flex-col gap-4 bg-card rounded-md">
-        <UsersTable columns={columns} data={data} />
+        <UsersTable columns={usersTableColumns} initialData={data} />
       </div>
     </div>
   );

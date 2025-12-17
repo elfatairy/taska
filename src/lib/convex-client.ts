@@ -14,7 +14,7 @@ export const convexClient = new ConvexHttpClient(
   process.env.NEXT_PUBLIC_CONVEX_URL!
 );
 
-export const getTokenIdentifier = async () => {
+export const getaccountToken = async () => {
   const cookiesList = await cookies();
   return cookiesList.get(ACCOUNT_COOKIE_NAME)?.value;
 };
@@ -25,9 +25,9 @@ export const convexQuery = async <
   query: Query,
   args: FunctionArgs<Query> = {}
 ): Promise<FunctionReturnType<Query>> => {
-  const tokenIdentifier = await getTokenIdentifier();
+  const accountToken = await getaccountToken();
   return await convexClient.query(query, {
     ...args,
-    tokenIdentifier,
+    accountToken: accountToken ?? "skip",
   });
 };
