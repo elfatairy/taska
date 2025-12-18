@@ -47,7 +47,7 @@
 
 - [x] Implement layout and sidebar
 - [x] Implement mock backend
-- [x] Role selection and onboarding flow
+- [x] Role selection and demo login flow
 
 ### 🚧 Upcoming Features
 
