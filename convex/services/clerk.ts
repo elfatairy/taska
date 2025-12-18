@@ -90,3 +90,19 @@ export async function createSignInToken(userId: string) {
   const signInToken = await response.json();
   return signInToken.token;
 }
+
+export async function verifyUserPassword(userId: string, password: string) {
+  const response = await fetch(`https://api.clerk.com/v1/users/${userId}/verify_password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+  if (!response.ok) {
+    return false;
+  }
+  const verifiedPassword = await response.json();
+  return verifiedPassword.verified;
+}

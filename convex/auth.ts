@@ -4,7 +4,8 @@ import { internalQuery } from "./_generated/server";
 import { ConvexError } from "convex/values";
 import { Doc } from "./_generated/dataModel";
 import { action } from "./_generated/server";
-import { createSignInToken } from "./services/clerk";
+import { createSignInToken, verifyUserPassword } from "./services/clerk";
+import { Result } from "./utils/types";
 
 const vLoginRole = v.union(
   v.literal("Product Manager"),
@@ -27,14 +28,41 @@ export const getUsersByRole = internalQuery({
     }
     const users: Doc<"users">[] = await ctx.db
       .query("users")
-      .filter(
-        (q) =>
-          q.eq(q.field("role"), args.role) &&
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("role"), args.role),
           q.eq(q.field("accountId"), account._id)
+        )
       )
       .collect();
-      
+
     return users;
+  },
+});
+
+export const getUserByEmail = internalQuery({
+  args: {
+    email: v.string(),
+    accountToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+      accountToken: args.accountToken,
+    });
+    if (!account) {
+      throw new ConvexError("Account not found");
+    }
+    const userPromise: Promise<Doc<"users"> | null> = ctx.db
+      .query("users")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("email"), args.email),
+          q.eq(q.field("accountId"), account._id)
+        )
+      )
+      .unique();
+
+    return await userPromise;
   },
 });
 
@@ -54,5 +82,39 @@ export const loginWithRole = action({
 
     const signInToken = await createSignInToken(users[0].clerkUserId);
     return signInToken;
+  },
+});
+
+export const login = action({
+  args: {
+    email: v.string(),
+    password: v.string(),
+    accountToken: v.string(),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Promise<Result<{ token: string }, "INVALID_EMAIL_OR_PASSWORD" | "UNEXPECTED_ERROR">> => {
+    try {
+      const user = await ctx.runQuery(internal.auth.getUserByEmail, {
+        email: args.email,
+        accountToken: args.accountToken,
+      });
+      if (!user) {
+        return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
+      }
+      const verifiedPassword = await verifyUserPassword(
+        user.clerkUserId,
+        args.password
+      );
+      if (!verifiedPassword) {
+        return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
+      }
+      const signInToken = await createSignInToken(user.clerkUserId);
+      return { data: { token: signInToken }, error: null };
+    } catch (error) {
+      console.error(error);
+      return { data: null, error: "UNEXPECTED_ERROR" };
+    }
   },
 });

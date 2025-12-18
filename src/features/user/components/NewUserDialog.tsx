@@ -22,7 +22,7 @@ export function NewUserDialog() {
   return (
     <Dialog onOpenChange={(open) => {
       if (!open) {
-        reset()
+        setTimeout(reset, 100);
       }
     }}>
       <DialogTrigger asChild>
