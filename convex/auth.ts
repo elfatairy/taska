@@ -1,11 +1,11 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import { internalQuery } from "./_generated/server";
+import { internal } from "@convex/_generated/api";
+import { internalQuery } from "@convex/_generated/server";
 import { ConvexError } from "convex/values";
-import { Doc } from "./_generated/dataModel";
-import { action } from "./_generated/server";
-import { createSignInToken, verifyUserPassword } from "./services/clerk";
-import { Result } from "./utils/types";
+import { Doc } from "@convex/_generated/dataModel";
+import { action } from "@convex/_generated/server";
+import { createSignInToken, verifyUserPassword } from "@convex/services/clerk";
+import { Result } from "@convex/utils/types";
 
 const vLoginRole = v.union(
   v.literal("Product Manager"),

@@ -1,4 +1,4 @@
-import { Doc } from "../_generated/dataModel";
+import { Doc } from "@convex/_generated/dataModel";
 
 export async function deleteClerkUser(clerkUserId: string) {
   await fetch(`https://api.clerk.com/v1/users/${clerkUserId}`, {

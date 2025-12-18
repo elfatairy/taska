@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { ROLES } from "./utils/constants";
+import { ROLES } from "@convex/utils/constants";
 
 export const vUserRole = v.union(
   v.literal("CTO" as const),

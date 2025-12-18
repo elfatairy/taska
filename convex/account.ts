@@ -1,7 +1,7 @@
-import { action, internalAction, internalMutation, internalQuery } from "./_generated/server";
+import { action, internalAction, internalMutation, internalQuery } from "@convex/_generated/server";
 import { v } from "convex/values";
-import { initializeUsers } from "./user";
-import { internal } from "./_generated/api";
+import { initializeUsers } from "@convex/user";
+import { internal } from "@convex/_generated/api";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 

@@ -1,7 +1,7 @@
-import { internalAction, internalMutation } from "@/_generated/server";
+import { internalAction, internalMutation } from "@convex/_generated/server";
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
-import { deleteClerkUser } from "@/services/clerk";
+import { internal } from "@convex/_generated/api";
+import { deleteClerkUser } from "@convex/services/clerk";
 
 export const deleteAccount = internalAction({
   args: {

@@ -4,14 +4,14 @@ import {
   internalMutation,
   internalQuery,
   query,
-} from "./_generated/server";
+} from "@convex/_generated/server";
 import { fakerEN } from "@faker-js/faker";
-import { internal } from "./_generated/api";
-import { Doc } from "./_generated/dataModel";
+import { internal } from "@convex/_generated/api";
+import { Doc } from "@convex/_generated/dataModel";
 import { ConvexError, v } from "convex/values";
-import { vUserRole } from "./schema";
-import { createClerkUser } from "./services/clerk";
-import { INITIAL_USERS_PASSWORD } from "./utils/constants";
+import { vUserRole } from "@convex/schema";
+import { createClerkUser } from "@convex/services/clerk";
+import { INITIAL_USERS_PASSWORD } from "@convex/utils/constants";
 
 function randomUser(): Omit<
   Doc<"users">,
