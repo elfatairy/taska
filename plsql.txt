@@ -1,0 +1,27 @@
+DECLARE
+  CREATE CURSOR g_starts_a FROM guests WHERE first_name IS LIKE "A%";
+  first_name guests.first_name%TYPE;
+  phone guests.phone%TYPE;
+BEGIN
+  FOR guest IN g_starts_a LOOP
+    DBMS_OUTPUT.INSERTLINE(guest.first_name | " " | guest.phone)
+EXCEPTION
+
+END;
+
+
+
+
+// ACTUAL SOLUTION
+
+DECLARE
+    CURSOR guest_cursor IS
+        SELECT first_name, phone
+        FROM guests
+        WHERE first_name LIKE 'A%';
+BEGIN
+    FOR guest_rec IN guest_cursor LOOP
+        DBMS_OUTPUT.PUT_LINE('Name: ' || guest_rec.first_name || ', Phone: ' || guest_rec.phone);
+    END LOOP;
+END;
+/

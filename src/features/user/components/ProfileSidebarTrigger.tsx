@@ -4,14 +4,14 @@ import { EllipsisVertical } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { ProfileDropdownContent } from "@/features/profile/components/DropdownContent";
+import { ProfileDropdownContent } from "@/features/user/components/ProfileDropdownContent";
 import { useUser } from "@clerk/nextjs";
-import PlaceholderProfileIcon from "./components/PlaceholderProfileIcon";
+import ProfilePlaceholderIcon from "./ProfilePlaceholderIcon";
 
 export default function ProfileSidebarTrigger({ className }: { className?: string }) {
   const { user } = useUser();
 
-  if (!user) return <PlaceholderProfileIcon />;
+  if (!user) return <ProfilePlaceholderIcon />;
 
   return (
     <div className={className}>
@@ -31,6 +31,7 @@ export default function ProfileSidebarTrigger({ className }: { className?: strin
             <EllipsisVertical className="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
+        
         <ProfileDropdownContent />
       </DropdownMenu>
     </div>

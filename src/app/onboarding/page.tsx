@@ -1,29 +1,29 @@
 import { UserIcon } from "lucide-react";
-import OnboardingCard from "./_components/OnboardingCard";
-import { Role } from "./types";
+import OnboardingCard from "@/features/auth/components/OnboardingCard";
+import { Role } from "@/features/auth/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 const roles: Role[] = [
   {
     label: "CTO",
-    value: "CTO",
+    value: "CTO" as const,
     icon: <UserIcon className="size-6 sm:size-10" aria-hidden />,
   },
   {
     label: "Product Manager",
-    value: "Product Manager",
+    value: "Product Manager" as const,
     icon: <UserIcon className="size-6 sm:size-10" aria-hidden />,
     locked: true,
   },
   {
     label: "Team Lead",
-    value: "Team Lead",
+    value: "Team Lead" as const,
     icon: <UserIcon className="size-6 sm:size-10" aria-hidden />,
     locked: true,
   },
   {
     label: "Developer",
-    value: "Developer",
+    value: "Developer" as const,
     icon: <UserIcon className="size-6 sm:size-10" aria-hidden />,
     locked: true,
   }

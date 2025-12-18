@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { CopyCopied, CopyToClipboard, CopyTrigger } from "@/components/ui/copy"
+import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/components/ui/copy"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn, featureUnderDevelopment } from "@/lib/utils"
 import { Doc } from "@convex/_generated/dataModel"
@@ -65,22 +65,22 @@ export const usersTableColumns: ColumnDef<Doc<"users">>[] = [
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-3xs">
-            <DropdownMenuItem>
-              <CopyToClipboard>
-                <CopyTrigger textToCopy={user._id}>
+            <CopyToClipboard textToCopy={user._id} className="w-full h-full">
+              <DropdownMenuItem onClick={(e) => e.preventDefault()}>
+                <CopyUncopied>
                   <span className="flex items-center gap-2">
                     <Copy className="h-2 w-2 text-foreground" />
                     Copy user ID
                   </span>
-                </CopyTrigger>
+                </CopyUncopied>
                 <CopyCopied>
                   <div className="flex items-center gap-2">
                     <Check className="h-2 w-2 text-foreground" />
                     Copied
                   </div>
                 </CopyCopied>
-              </CopyToClipboard>
-            </DropdownMenuItem>
+              </DropdownMenuItem>
+            </CopyToClipboard>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => featureUnderDevelopment()}

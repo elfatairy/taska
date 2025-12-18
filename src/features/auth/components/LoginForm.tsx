@@ -5,31 +5,8 @@ import Github from "@/components/icons/Github";
 import { OrSeparator } from "@/components/OrSeparator";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-import { useAppForm } from "@/hooks/form";
 import { featureUnderDevelopment } from "@/lib/utils";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-})
-
-const useLoginForm = () => {
-  const form = useAppForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    validators: {
-      onSubmit: loginSchema,
-    },
-    onSubmit: async ({ value }) => {
-      console.log(value);
-    },
-  });
-
-  return form;
-}
+import { useLoginForm } from "@/features/auth/hooks/useLoginForm";
 
 export function LoginForm() {
   const form = useLoginForm();

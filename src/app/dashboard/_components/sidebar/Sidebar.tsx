@@ -2,7 +2,7 @@ import AppLogo from "@/components/AppLogo";
 import SearchBar from "@/components/SearchBar";
 import { Separator } from "@/components/ui/separator";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
-import ProfileSidebarTrigger from "@/features/profile/SidebarTrigger";
+import ProfileSidebarTrigger from "@/features/user/components/ProfileSidebarTrigger";
 import { MainNav } from "@/app/dashboard/_components/sidebar/MainNav";
 import { UtilityNav } from "@/app/dashboard/_components/sidebar/UtilityNav";
 

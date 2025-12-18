@@ -47,7 +47,7 @@ export function useAccountMutation<
       throw new Error("Cannot run mutation: Account ID cookie missing.");
     }
 
-    // @ts-expect-error: TypeScript might complain that the original type didn't
+    // @ts-expect-error: TypeScript might complain that the original type didn't // TODO: Fix this
     return originalMutation({ ...args, accountToken });
   };
 }

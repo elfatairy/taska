@@ -4,10 +4,10 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
 import { useState } from "react"
-import { NewUser } from "./NewUser"
+import { NewUserDialog } from "./NewUserDialog"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { User } from "./UsersColumns"
+import { User } from "./UsersTableColumns"
 
 interface UsersTableProps {
   columns: ColumnDef<User>[]
@@ -43,7 +43,7 @@ export function UsersTable({
           }
           className="max-w-sm w-full"
         />
-        <NewUser />
+        <NewUserDialog />
       </div>
       <Table>
         <TableHeader className="border-t">

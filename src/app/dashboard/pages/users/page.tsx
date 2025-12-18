@@ -1,5 +1,5 @@
-import { usersTableColumns } from "./UsersColumns";
-import { UsersTable } from "./UsersTable";
+import { usersTableColumns } from "@/features/user/components/UsersTableColumns";
+import { UsersTable } from "@/features/user/components/UsersTable";
 import { convexQuery } from "@/lib/convex-client";
 import { api } from "@convex/_generated/api";
 

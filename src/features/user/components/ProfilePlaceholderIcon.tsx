@@ -1,6 +1,6 @@
 import { Icon } from "@/components/Icon";
 
-export default function PlaceholderProfileIcon() {
+export default function ProfilePlaceholderIcon() {
   return (
     <div
       className="flex items-center justify-center bg-muted text-muted-foreground rounded-full w-9 h-9"

@@ -10,16 +10,25 @@ const CopyToClipboarContext = createContext<{
   setIsCopied: () => { }
 })
 
-export const CopyToClipboard = ({ children }: { children: React.ReactNode }) => {
+export const CopyToClipboard = ({ children, className, textToCopy }: { children: React.ReactNode, className?: string, textToCopy: string }) => {
   const [isCopied, setIsCopied] = useState(false)
   return (
     <CopyToClipboarContext.Provider value={{ isCopied, setIsCopied }}>
-      {children}
+      <button
+        className={className}
+        onClick={(e) => {
+          e.preventDefault()
+          navigator.clipboard.writeText(textToCopy)
+          setIsCopied(true)
+          setTimeout(() => setIsCopied(false), 2000)
+        }}>
+        {children}
+      </button>
     </CopyToClipboarContext.Provider>
   )
 }
 
-const useCopy = () => {
+export const useCopy = () => {
   const context = useContext(CopyToClipboarContext)
   if (!context) {
     throw new Error("useCopy must be used within a CopyToClipboardContext")
@@ -27,30 +36,21 @@ const useCopy = () => {
   return context
 }
 
-export const CopyTrigger = ({ children, textToCopy, className }: { children: React.ReactNode, textToCopy: string, className?: string }) => {
-  const { isCopied, setIsCopied } = useContext(CopyToClipboarContext)
-
-  if (isCopied) {
+export const CopyCopied = ({ children, className }: { children: React.ReactNode, className?: string }) => {
+  const { isCopied } = useCopy()
+  if (!isCopied) {
     return null
   }
-
   return (
-    <button
-      className={className}
-      onClick={(e) => {
-        e.preventDefault()
-        navigator.clipboard.writeText(textToCopy)
-        setIsCopied(true)
-        setTimeout(() => setIsCopied(false), 2000)
-      }}>
+    <div className={className}>
       {children}
-    </button>
+    </div>
   )
 }
 
-export const CopyCopied = ({ children, className }: { children: React.ReactNode, className?: string }) => {
-  const { isCopied } = useContext(CopyToClipboarContext)
-  if (!isCopied) {
+export const CopyUncopied = ({ children, className }: { children: React.ReactNode, className?: string }) => {
+  const { isCopied } = useCopy()
+  if (isCopied) {
     return null
   }
   return (

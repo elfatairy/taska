@@ -11,7 +11,7 @@ import { tryCatch } from "@/lib/try-catch";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icon";
 import { cn, featureUnderDevelopment } from "@/lib/utils";
-import { Role } from "../types";
+import { Role } from "@/features/auth/types";
 
 export default function OnboardingCard({ role }: { role: Role }) {
   const router = useRouter();

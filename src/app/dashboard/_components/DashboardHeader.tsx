@@ -5,8 +5,8 @@ import { Icon } from "@/components/Icon";
 import SearchBar from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
-import NotificationTrigger from "@/features/notifications/NotificationTrigger";
-import ProfileHeaderTrigger from "@/features/profile/HeaderTrigger";
+import NotificationTrigger from "@/features/notification/NotificationTrigger";
+import ProfileHeaderTrigger from "@/features/user/components/ProfileHeaderTrigger";
 
 export function DashboardHeader() {
   const { toggleSidebar } = useSidebar();

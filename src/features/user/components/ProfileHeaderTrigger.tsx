@@ -3,14 +3,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ProfileDropdownContent } from "@/features/profile/components/DropdownContent";
+import { ProfileDropdownContent } from "@/features/user/components/ProfileDropdownContent";
 import { useUser } from "@clerk/nextjs";
-import PlaceholderProfileIcon from "./components/PlaceholderProfileIcon";
+import ProfilePlaceholderIcon from "./ProfilePlaceholderIcon";
 
 export default function ProfileHeaderTrigger({ className }: { className?: string }) {
   const { user } = useUser();
 
-  if (!user) return <PlaceholderProfileIcon />;
+  if (!user) return <ProfilePlaceholderIcon />;
 
   return (
     <div className={className}>
