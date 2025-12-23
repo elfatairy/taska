@@ -2,6 +2,7 @@ import { usersTableColumns } from "@/features/user/components/UsersTableColumns"
 import { UsersTable } from "@/features/user/components/UsersTable";
 import { convexQuery } from "@/lib/convex-client";
 import { api } from "@convex/_generated/api";
+import { Icon } from "@/components/Icon";
 
 export default async function UsersPage() {
   const data = await convexQuery(api.user.getUsers);

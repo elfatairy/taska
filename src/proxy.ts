@@ -5,8 +5,8 @@ import { convexClient } from "@/lib/convex-client"
 import { api } from "@convex/_generated/api"
 import { ACCOUNT_COOKIE_NAME } from "@/lib/constants"
 
-const isAuthenticatedRoutes = createRouteMatcher(['/dashboard(.*)', '/forum(.*)'])
-const unauthenticatedRoutes = ['/login', '/demo-login', '/']
+const isAuthenticatedRoutes = createRouteMatcher(['/dashboard(.*)'])
+const unauthenticatedRoutes = ['/login']
 
 export default clerkMiddleware(async (_auth: typeof auth, request: NextRequest) => {
   const { userId } = await _auth()

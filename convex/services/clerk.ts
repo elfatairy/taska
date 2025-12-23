@@ -12,7 +12,7 @@ export async function deleteClerkUser(clerkUserId: string) {
 export async function createClerkUser(
   user: Pick<
     Doc<"users">,
-    "name" | "email"
+    "name" | "email" | "role"
   > & {
     avatarUrl?: string;
     password?: string;
@@ -29,6 +29,9 @@ export async function createClerkUser(
       last_name: user.name.split(" ")[1],
       email_address: [user.email],
       password: user.password,
+      public_metadata: {
+        role: user.role,
+      },
     }),
   });
   if (!response.ok) {

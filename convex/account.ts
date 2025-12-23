@@ -2,6 +2,7 @@ import { action, internalAction, internalMutation, internalQuery } from "@convex
 import { v } from "convex/values";
 import { initializeUsers } from "@convex/user";
 import { internal } from "@convex/_generated/api";
+import { deleteClerkUser } from "./services/clerk";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 
@@ -48,12 +49,3 @@ export const initializeAccount = action({
     return;
   },
 });
-
-export const clearAccount = internalAction({
-  args: {
-    accountId: v.id("accounts"),
-  },
-  handler: async (ctx, args) => {
-    
-  },
-})

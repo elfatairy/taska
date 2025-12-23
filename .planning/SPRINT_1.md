@@ -310,18 +310,18 @@ By the end of this sprint, we will have:
 
 ### Nice-to-Have (P2)
 - [ ] Email notifications for password reset (can mock with console.log)
-- [ ] Advanced table features (sorting, pagination)
-- [ ] User profile pictures
+- [x] Advanced table features (sorting, pagination)
+- [x] User profile pictures
 
 ---
 
 ## Definition of Done
-- [ ] All code reviewed and merged to main branch
+- [x] All code reviewed and merged to main branch
 - [ ] All tests passing
 - [ ] Features deployed to staging environment
 - [ ] Documentation updated
 - [ ] Sprint demo prepared
-- [ ] CTO can create, edit, and deactivate users
+- [-] CTO can create, edit, and deactivate users
 - [ ] All four roles can log in and see role-appropriate navigation
 
 ---

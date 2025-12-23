@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { SVGProps } from "react";
-const SvgChartPie = (props: SVGProps<SVGSVGElement>) => (
+const SvgMessageCircle = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -9,14 +9,13 @@ const SvgChartPie = (props: SVGProps<SVGSVGElement>) => (
     height="1em"
     {...props}
   >
-    <g
+    <path
       stroke="#000"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-    >
-      <path d="M19.95 17.95 15 13h7a6.98 6.98 0 0 1-2.05 4.95M20 10a7 7 0 0 0-7-7v7zM2 12a8 8 0 0 0 13.657 5.657L10 12V4a8 8 0 0 0-8 8" />
-    </g>
+      d="m15.695 19.232 3.408 1.136a1 1 0 0 0 1.265-1.265l-1.136-3.408M15.3 19.1s-1.215.9-3.8.9a8.5 8.5 0 1 1 8.5-8.5c0 2.5-.9 3.8-.9 3.8"
+    />
   </svg>
 );
-export default SvgChartPie;
+export default SvgMessageCircle;

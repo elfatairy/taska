@@ -123,9 +123,12 @@ body {
     @apply bg-background text-foreground;
   }
 
-  .custom-icon path,
-  .custom-icon rect {
+  .custom-icon path[stroke],
+  .custom-icon rect[stroke] {
     stroke: currentColor;
+  }
+  .custom-icon path[fill],
+  .custom-icon rect[fill] {
     fill: currentColor;
   }
 }

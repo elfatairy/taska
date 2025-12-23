@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { SVGProps } from "react";
-const SvgChartPie = (props: SVGProps<SVGSVGElement>) => (
+const SvgListCheck = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -10,13 +10,14 @@ const SvgChartPie = (props: SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <g
-      stroke="#000"
+      stroke="#292D32"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
     >
-      <path d="M19.95 17.95 15 13h7a6.98 6.98 0 0 1-2.05 4.95M20 10a7 7 0 0 0-7-7v7zM2 12a8 8 0 0 0 13.657 5.657L10 12V4a8 8 0 0 0-8 8" />
+      <path d="M12.37 8.88h5.25M6.38 8.88l.75.75 2.25-2.25M12.37 15.88h5.25M6.38 15.88l.75.75 2.25-2.25" />
+      <path d="M9 22h6c5 0 7-2 7-7V9c0-5-2-7-7-7H9C4 2 2 4 2 9v6c0 5 2 7 7 7" />
     </g>
   </svg>
 );
-export default SvgChartPie;
+export default SvgListCheck;

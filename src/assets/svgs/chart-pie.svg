@@ -1,9 +1,13 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path
-    d="M2.3999 12C2.3999 9.45395 3.41133 7.01215 5.21168 5.2118C7.01203 3.41145 9.45382 2.40002 11.9999 2.40002V12H21.5999C21.5999 14.5461 20.5885 16.9879 18.7881 18.7882C16.9878 20.5886 14.546 21.6 11.9999 21.6C9.45382 21.6 7.01203 20.5886 5.21168 18.7882C3.41133 16.9879 2.3999 14.5461 2.3999 12Z"
-    fill="#0E9F6E" />
-  <path
-    d="M14.3999 2.70239C16.0603 3.13255 17.5754 3.99893 18.7882 5.21174C20.001 6.42454 20.8673 7.93964 21.2975 9.59999H14.3999V2.70239Z"
-    fill="#0E9F6E" />
+<svg viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+  <g id="SVGRepo_iconCarrier">
+    <path d="M19.9497 17.9497L15 13H22C22 14.933 21.2165 16.683 19.9497 17.9497Z" stroke="#000000"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M20 10C20 6.13401 16.866 3 13 3V10H20Z" stroke="#000000" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"></path>
+    <path
+      d="M2 12C2 16.4183 5.58172 20 10 20C12.2091 20 14.2091 19.1046 15.6569 17.6569L10 12V4C5.58172 4 2 7.58172 2 12Z"
+      stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
 </svg>
-  

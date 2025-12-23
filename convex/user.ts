@@ -79,7 +79,7 @@ export const deleteUser = internalMutation({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.delete(args.userId);
+    return await ctx.db.delete("users", args.userId);
   },
 });
 
@@ -113,7 +113,11 @@ export const initializeUsers = async (
       ...randomUser(),
       role: "CTO" as const,
     },
-    ...Array.from({ length: 10 }).map(() => randomUser()),
+    {
+      ...randomUser(),
+      role: "Product Manager" as const,
+    },
+    ...Array.from({ length: 9 }).map(() => randomUser()),
   ];
 
   await Promise.all(
@@ -165,6 +169,7 @@ export const createUser = action({
       name: args.user.name,
       email: args.user.email,
       password: password,
+      role: args.user.role,
     });
     await ctx.runMutation(internal.user.createUserService, {
       accountId: account._id,

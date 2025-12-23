@@ -12,7 +12,7 @@ const SvgDoubleGear = (props: SVGProps<SVGSVGElement>) => (
       <defs>
         <style>
           {
-            ".double-gear_svg__cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:20px}"
+            ".double-gear_svg__cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:30px}"
           }
         </style>
       </defs>

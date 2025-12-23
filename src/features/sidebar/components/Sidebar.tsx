@@ -1,22 +1,18 @@
 import AppLogo from "@/components/AppLogo";
 import SearchBar from "@/components/SearchBar";
-import { Separator } from "@/components/ui/separator";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Sidebar as ShadcnSidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 import ProfileSidebarTrigger from "@/features/user/components/ProfileSidebarTrigger";
-import { MainNav } from "@/app/dashboard/_components/sidebar/MainNav";
-import { UtilityNav } from "@/app/dashboard/_components/sidebar/UtilityNav";
+import { SidebarNav } from "@/features/sidebar/components/SidebarNav";
 
-export function DashboardSidebar() {
+export function Sidebar() {
   return (
-    <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]">
+    <ShadcnSidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]">
       <SidebarContent>
         <SidebarHeader className="ml-2 md:hidden flex-row mt-2 items-center justify-between gap-4">
           <AppLogo />
           <SearchBar />
         </SidebarHeader>
-        <MainNav />
-        <Separator />
-        <UtilityNav />
+        <SidebarNav />
         <SidebarFooter className="md:hidden">
           <SidebarMenu>
             <SidebarMenuItem>
@@ -25,6 +21,6 @@ export function DashboardSidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </SidebarContent>
-    </Sidebar>
+    </ShadcnSidebar>
   )
 }

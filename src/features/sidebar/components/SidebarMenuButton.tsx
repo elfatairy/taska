@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { SidebarMenuButton as SidebarMenuButtonBase, SidebarMenuSubButton as SidebarMenuSubButtonBase, useSidebar } from "@/components/ui/sidebar";
-import type { Route } from "@/app/dashboard/_components/sidebar/types";
+import type { SidebarRoute } from "@/features/sidebar/types";
 import { usePathname } from "next/navigation";
 
 interface NavLinkProps {
-  route: Route;
+  route: SidebarRoute;
 }
 
 export function SidebarMenuButton({ route, ...props }: NavLinkProps) {
@@ -35,6 +35,16 @@ export function SidebarMenuSubButton({ route, ...props }: NavLinkProps) {
 const SidebarNavLink = ({ route, ...props }: NavLinkProps) => {
   const { toggleSidebar, isMobile } = useSidebar();
   
+
+  if (!route.href) {
+    return (
+      <div className="gap-4" {...props}>
+        {route.icon && <Icon icon={route.icon} size={20} strokeWidth={0} className="fill-none" />}
+        {route.label}
+      </div>
+    )
+  }
+
   return (
     <Link
       href={route.href}
@@ -46,7 +56,7 @@ const SidebarNavLink = ({ route, ...props }: NavLinkProps) => {
         }
       }}
     >
-      {route.icon && <Icon icon={route.icon} size={20} strokeWidth={0} />}
+      {route.icon && <Icon icon={route.icon} size={20} strokeWidth={0} className="fill-none" />}
       {route.label}
     </Link>
   )
