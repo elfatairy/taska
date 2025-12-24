@@ -8,21 +8,22 @@ import { NewUserDialog } from "./NewUserDialog"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
 import { User } from "./UsersTableColumns"
+import { UsersTableSkeleton } from "./UsersTableSkeleton"
 
 interface UsersTableProps {
   columns: ColumnDef<User>[]
-  initialData: User[]
 }
 
 export function UsersTable({
   columns,
-  initialData,
 }: UsersTableProps) {
-  const data = useAccountQuery(api.user.getUsers);
+  const queryResult = useAccountQuery(api.user.getUsers);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const data = queryResult?.data || [];
+
   const table = useReactTable({
-    data: data || initialData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -31,6 +32,14 @@ export function UsersTable({
       columnFilters,
     },
   })
+
+  if (!queryResult) {
+    return <UsersTableSkeleton />;
+  }
+  
+  if (queryResult.error) {
+    throw new Error(queryResult.error);
+  }
 
   return (
     <div className="overflow-hidden ">

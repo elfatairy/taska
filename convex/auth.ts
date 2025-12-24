@@ -19,12 +19,12 @@ export const getUsersByRole = internalQuery({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args) : Promise<Result<Doc<"users">[], "NOT_AUTHENTICATED">> => {
     const account = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
-      throw new ConvexError("Account not found");
+      return { data: null, error: "NOT_AUTHENTICATED" };
     }
     const users: Doc<"users">[] = await ctx.db
       .query("users")
@@ -36,7 +36,7 @@ export const getUsersByRole = internalQuery({
       )
       .collect();
 
-    return users;
+    return { data: users, error: null };
   },
 });
 
@@ -71,17 +71,20 @@ export const loginWithRole = action({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) => {
-    const users = await ctx.runQuery(internal.auth.getUsersByRole, {
+  handler: async (ctx, args) : Promise<Result<{ token: string }, "NOT_AUTHENTICATED" | "ROLE_NOT_FOUND_IN_ACCOUNT" | "UNEXPECTED_ERROR">> => {
+    const { data: users, error: usersError } = await ctx.runQuery(internal.auth.getUsersByRole, {
       role: args.role,
       accountToken: args.accountToken,
     });
+    if (usersError) {
+      return { data: null, error: usersError };
+    }
     if (!users[0]) {
-      throw new ConvexError("There is no user with this role in this account");
+      return { data: null, error: "ROLE_NOT_FOUND_IN_ACCOUNT" };
     }
 
     const signInToken = await createSignInToken(users[0].clerkUserId);
-    return signInToken;
+    return { data: { token: signInToken }, error: null };
   },
 });
 

@@ -1,16 +1,26 @@
+"use client"
+
 import { usersTableColumns } from "@/features/user/components/UsersTableColumns";
 import { UsersTable } from "@/features/user/components/UsersTable";
-import { convexQuery } from "@/lib/convex-client";
-import { api } from "@convex/_generated/api";
-import { Icon } from "@/components/Icon";
+import { useConvexAuth } from "convex/react";
+import UsersPageLoading from "./loading";
+import { redirect } from "next/navigation";
 
-export default async function UsersPage() {
-  const data = await convexQuery(api.user.getUsers);
+export default function UsersPage() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  if (isLoading) {
+    return <UsersPageLoading />;
+  }
+
+  if (!isAuthenticated) {
+    redirect("/login");
+  }
 
   return (
     <div className="space-y-4 p-4">
       <div className="flex flex-col gap-4 bg-card rounded-md">
-        <UsersTable columns={usersTableColumns} initialData={data} />
+        <UsersTable columns={usersTableColumns} />
       </div>
     </div>
   );

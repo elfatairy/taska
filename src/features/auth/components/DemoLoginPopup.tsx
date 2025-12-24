@@ -95,13 +95,19 @@ function DemoLoginButton({ role }: { role: Role }) {
 
     startTransition(async () => {
       try {
-        const token = await loginWithRole({
+        const { data, error: loginWithRoleError } = await loginWithRole({
           role: role.value
         });
 
+        if (loginWithRoleError) {
+          console.error(loginWithRoleError);
+          toast.error("Failed to login");
+          return;
+        }
+
         const { data: result, error } = await tryCatch(signIn.create({
           strategy: "ticket",
-          ticket: token,
+          ticket: data.token,
         }));
 
         if (error) {

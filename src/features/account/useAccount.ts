@@ -1,7 +1,6 @@
 "use client";
 
 import { ACCOUNT_COOKIE_NAME } from "@/lib/constants";
-import { api } from "@convex/_generated/api";
 import {
   OptionalRestArgsOrSkip,
   useAction,

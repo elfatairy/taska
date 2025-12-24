@@ -7,10 +7,15 @@ import { SidebarMenuSubButton, SidebarMenuButton } from "@/features/sidebar/comp
 import type { SidebarRoute } from "@/features/sidebar/types"
 import { Separator } from "@/components/ui/separator"
 import { useGetSidebarRoutes } from "../hooks/useGetSidebarRoutes"
+import { SidebarNavSkeleton } from "./SidebarSkeleton"
 import React from "react"
 
 export function SidebarNav() {
-  const routes = useGetSidebarRoutes();
+  const { routes, isLoaded } = useGetSidebarRoutes();
+
+  if (!isLoaded) {
+    return <SidebarNavSkeleton />;
+  }
 
   return (
     <>

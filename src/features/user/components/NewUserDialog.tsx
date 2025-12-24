@@ -17,7 +17,7 @@ import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/components/ui/copy"
 import { useNewUserForm } from "@/features/user/hooks/useNewUserForm";
 
 export function NewUserDialog() {
-  const { form, successData, reset } = useNewUserForm()
+  const { form, successData, reset, error } = useNewUserForm()
 
   return (
     <Dialog onOpenChange={(open) => {
@@ -29,6 +29,7 @@ export function NewUserDialog() {
         <Button variant="outline"><PlusIcon className="w-4 h-4" />New User</Button>
       </DialogTrigger>
       <DialogContent>
+        {error && <div className="text-red-500 text-sm">{error}</div> /** TODO: Show a proper error ui */}
         {
           successData ?
             <FormSuccess successData={successData} isTemporaryPassword={form.state.values.requirePasswordChange} /> :

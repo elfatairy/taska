@@ -12,7 +12,9 @@ export function Sidebar() {
           <AppLogo />
           <SearchBar />
         </SidebarHeader>
+
         <SidebarNav />
+        
         <SidebarFooter className="md:hidden">
           <SidebarMenu>
             <SidebarMenuItem>

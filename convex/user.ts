@@ -8,10 +8,12 @@ import {
 import { fakerEN } from "@faker-js/faker";
 import { internal } from "@convex/_generated/api";
 import { Doc } from "@convex/_generated/dataModel";
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import { vUserRole } from "@convex/schema";
 import { createClerkUser } from "@convex/services/clerk";
-import { INITIAL_USERS_PASSWORD } from "@convex/utils/constants";
+import { INITIAL_USERS_PASSWORD, ROLES } from "@convex/utils/constants";
+import { Result } from "./utils/types";
+import { requireRole } from "./utils/auth";
 
 function randomUser(): Omit<
   Doc<"users">,
@@ -26,14 +28,7 @@ function randomUser(): Omit<
       lastName,
     }),
     avatarUrl: fakerEN.image.avatar(),
-    role: fakerEN.helpers.arrayElement([
-      "Product Manager",
-      "Frontend Developer",
-      "Backend Developer",
-      "Designer",
-      "QA",
-      "DevOps",
-    ]),
+    role: fakerEN.helpers.arrayElement(ROLES),
     updatedAt: fakerEN.date.past().getTime(),
     isOnline: fakerEN.datatype.boolean(),
   };
@@ -60,17 +55,23 @@ export const getUsers = query({
   args: {
     accountToken: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args) : Promise<Result<Doc<"users">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR">> => {
     const account = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
-      throw new ConvexError("Account not found");
+      return { data: null, error: "NOT_AUTHENTICATED" };
     }
+
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
     const users: Doc<"users">[] = await ctx.runQuery(internal.user.getUsersByAccountId, {
       accountId: account._id,
     });
-    return users;
+    return { data: users, error: null };
   },
 });
 
@@ -149,16 +150,21 @@ export const createUser = action({
       role: vUserRole
     }),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args) : Promise<Result<string, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR">> => {
     const account = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
-      throw new ConvexError("Account not found");
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
     }
 
     const password = randomPassword()
-    const user = {
+    const newUser = {
       name: args.user.name,
       email: args.user.email,
       role: args.user.role,
@@ -174,11 +180,11 @@ export const createUser = action({
     await ctx.runMutation(internal.user.createUserService, {
       accountId: account._id,
       user: {
-        ...user,
+        ...newUser,
         clerkUserId: clerkUser.id,
         avatarUrl: clerkUser.avatarUrl,
       },
     });
-    return password;
+    return { data: password, error: null };
   },
 });
