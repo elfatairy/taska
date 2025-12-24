@@ -1,6 +1,7 @@
 "use client";
 
 import { ACCOUNT_COOKIE_NAME } from "@/lib/constants";
+import { tryCatch } from "@/lib/try-catch";
 import {
   OptionalRestArgsOrSkip,
   useAction,
@@ -32,7 +33,12 @@ export function useAccountQuery<
     ? { ...originalArgs, accountToken }
     : ("skip" as const)) as unknown as OptionalRestArgsOrSkip<Query>[0];
 
-  return useQuery(query, newArgs);
+    try {
+      return useQuery(query, newArgs);
+    } catch (error) {
+      console.error(error);
+      return { data: null, error: "UNEXPECTED_ERROR" };
+    }
 }
 
 export function useAccountMutation<
@@ -46,8 +52,13 @@ export function useAccountMutation<
       throw new Error("Cannot run mutation: Account ID cookie missing.");
     }
 
-    // @ts-expect-error: TypeScript might complain that the original type didn't // TODO: Fix this
-    return originalMutation({ ...args, accountToken });
+    try {
+      // @ts-expect-error: TypeScript might complain that the original type didn't // TODO: Fix this
+      return originalMutation({ ...args, accountToken });
+    } catch (error) {
+      console.error(error);
+      return { data: null, error: "UNEXPECTED_ERROR" };
+    }
   };
 }
 
@@ -62,7 +73,12 @@ export function useAccountAction<Action extends FunctionReference<"action">>(
       throw new Error("Cannot run action: Account ID cookie missing.");
     }
 
-    // @ts-expect-error: TypeScript might complain that the original type didn't
-    return originalAction({ ...args, accountToken });
+    try {
+      // @ts-expect-error: TypeScript might complain that the original type didn't
+      return originalAction({ ...args, accountToken });
+    } catch (error) {
+      console.error(error);
+      return { data: null, error: "UNEXPECTED_ERROR" as const };
+    }
   };
 }

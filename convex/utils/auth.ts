@@ -6,12 +6,7 @@ import { ROLES } from "./constants";
 export const requireRole = async (
   ctx: QueryCtx | ActionCtx,
   requiredRoles: string[]
-): Promise<
-  Result<
-    { identity: UserIdentity },
-    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"
-  >
-> => {
+): Result<UserIdentity, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"> => {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity || !identity.subject) {
     return { data: null, error: "NOT_AUTHENTICATED" };
@@ -21,5 +16,5 @@ export const requireRole = async (
     return { data: null, error: "NOT_AUTHORIZED" };
   }
 
-  return { data: { identity }, error: null };
+  return { data: identity, error: null };
 };

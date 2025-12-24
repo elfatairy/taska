@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Role } from "../types";
 import { cn, featureUnderDevelopment } from "@/lib/utils";
 import { tryCatch } from "@/lib/try-catch";
+import { isFailure } from "@convex/utils/types";
 
 const roles: Role[] = [
   {
@@ -95,19 +96,19 @@ function DemoLoginButton({ role }: { role: Role }) {
 
     startTransition(async () => {
       try {
-        const { data, error: loginWithRoleError } = await loginWithRole({
+        const loginWithRoleResult = await loginWithRole({
           role: role.value
         });
 
-        if (loginWithRoleError) {
-          console.error(loginWithRoleError);
+        if (isFailure(loginWithRoleResult)) {
+          console.error(loginWithRoleResult.error);
           toast.error("Failed to login");
           return;
         }
 
         const { data: result, error } = await tryCatch(signIn.create({
           strategy: "ticket",
-          ticket: data.token,
+          ticket: loginWithRoleResult.data.token,
         }));
 
         if (error) {

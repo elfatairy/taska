@@ -4,6 +4,7 @@ import { api } from "@convex/_generated/api";
 import { useAccountAction } from "@/features/account/useAccount";
 import { z } from "zod";
 import { ROLES } from "@convex/utils/constants";
+import { isFailure } from "@convex/utils/types";
 
 const formSchema = z.object({
   email: z.email(),
@@ -31,18 +32,18 @@ export function useNewUserForm() {
     },
     onSubmit: async ({ value }) => {
       console.log(value);
-      const {data: password, error} = await createUser({
+      const createUserResult = await createUser({
         user: {
           name: `${value.firstName} ${value.lastName}`,
           email: value.email,
           role: value.role,
         },
       });
-      if (error) {
-        setError(error);
+      if (isFailure(createUserResult)) {
+        setError(createUserResult.error);
         return;
       }
-      setSuccessData({ password });
+      setSuccessData({ password: createUserResult.data });
       setError(null);
     },
   })

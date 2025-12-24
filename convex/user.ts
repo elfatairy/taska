@@ -7,7 +7,7 @@ import {
 } from "@convex/_generated/server";
 import { fakerEN } from "@faker-js/faker";
 import { internal } from "@convex/_generated/api";
-import { Doc } from "@convex/_generated/dataModel";
+import { Doc, Id } from "@convex/_generated/dataModel";
 import { v } from "convex/values";
 import { vUserRole } from "@convex/schema";
 import { createClerkUser } from "@convex/services/clerk";
@@ -43,11 +43,12 @@ export const getUsersByAccountId = internalQuery({
   args: {
     accountId: v.id("accounts"),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db
+  handler: async (ctx, args) : Result<Doc<"users">[]> => {
+    const users = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("accountId"), args.accountId))
       .collect();
+    return { data: users, error: null };
   },
 });
 
@@ -55,8 +56,8 @@ export const getUsers = query({
   args: {
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Promise<Result<Doc<"users">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR">> => {
-    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR"> => {
+    const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
@@ -68,7 +69,7 @@ export const getUsers = query({
       return { data: null, error: identityError };
     }
 
-    const users: Doc<"users">[] = await ctx.runQuery(internal.user.getUsersByAccountId, {
+    const { data: users } = await ctx.runQuery(internal.user.getUsersByAccountId, {
       accountId: account._id,
     });
     return { data: users, error: null };
@@ -79,8 +80,9 @@ export const deleteUser = internalMutation({
   args: {
     userId: v.id("users"),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db.delete("users", args.userId);
+  handler: async (ctx, args) : Result<void, "UNEXPECTED_ERROR"> => {
+    const result = await ctx.db.delete("users", args.userId);
+    return { data: result, error: null };
   },
 });
 
@@ -97,18 +99,19 @@ export const createUserService = internalMutation({
       clerkUserId: v.string(),
     }),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("users", {
+  handler: async (ctx, args) : Result<Id<"users">> => {
+    const userId = await ctx.db.insert("users", {
       ...args.user,
       accountId: args.accountId,
     });
+    return { data: userId, error: null };
   },
 });
 
 export const initializeUsers = async (
   ctx: ActionCtx,
   accountId: Doc<"accounts">["_id"]
-) => {
+) : Result<void> => {
   const initialUsers = [
     {
       ...randomUser(),
@@ -123,7 +126,7 @@ export const initializeUsers = async (
 
   await Promise.all(
     initialUsers.map(async (user) => {
-      const { id: clerkUserId, avatarUrl } = await createClerkUser({
+      const { data: { id: clerkUserId, avatarUrl } } = await createClerkUser({
         ...user,
         password: INITIAL_USERS_PASSWORD,
       });
@@ -138,7 +141,7 @@ export const initializeUsers = async (
     })
   );
 
-  return;
+  return { data: undefined, error: null };
 };
 
 export const createUser = action({
@@ -150,8 +153,8 @@ export const createUser = action({
       role: vUserRole
     }),
   },
-  handler: async (ctx, args) : Promise<Result<string, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR">> => {
-    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+  handler: async (ctx, args) : Result<string, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR"> => {
+    const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
@@ -171,7 +174,7 @@ export const createUser = action({
       updatedAt: Date.now(),
       isOnline: false,
     };
-    const clerkUser = await createClerkUser({
+    const { data: clerkUser } = await createClerkUser({
       name: args.user.name,
       email: args.user.email,
       password: password,

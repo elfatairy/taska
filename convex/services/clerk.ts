@@ -1,12 +1,17 @@
 import { Doc } from "@convex/_generated/dataModel";
+import { Result } from "@convex/utils/types";
 
-export async function deleteClerkUser(clerkUserId: string) {
-  await fetch(`https://api.clerk.com/v1/users/${clerkUserId}`, {
+const clerkApiUrl = "https://api.clerk.com/v1";
+
+export async function deleteClerkUser(clerkUserId: string) : Result<void> {
+  await fetch(`${clerkApiUrl}/users/${clerkUserId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
     },
   });
+
+  return { data: undefined, error: null };
 }
 
 export async function createClerkUser(
@@ -17,8 +22,8 @@ export async function createClerkUser(
     avatarUrl?: string;
     password?: string;
   }
-) {
-  const response = await fetch("https://api.clerk.com/v1/users", {
+) : Result<{ id: string; avatarUrl: string }> {
+  const response = await fetch(`${clerkApiUrl}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -69,14 +74,14 @@ export async function createClerkUser(
     }
   }
 
-  return {
+  return { data: {
     id: clerkUser.id,
     avatarUrl: clerkUser.image_url,
-  };
+  }, error: null };
 }
 
-export async function createSignInToken(userId: string) {
-  const response = await fetch("https://api.clerk.com/v1/sign_in_tokens", {
+export async function createSignInToken(userId: string) : Result<string> {
+  const response = await fetch(`${clerkApiUrl}/sign_in_tokens`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -91,11 +96,11 @@ export async function createSignInToken(userId: string) {
     throw new Error(`Failed to create sign in token: ${response.statusText}`);
   }
   const signInToken = await response.json();
-  return signInToken.token;
+  return { data: signInToken.token, error: null };
 }
 
-export async function verifyUserPassword(userId: string, password: string) {
-  const response = await fetch(`https://api.clerk.com/v1/users/${userId}/verify_password`, {
+export async function verifyUserPassword(userId: string, password: string) : Result<boolean> {
+  const response = await fetch(`${clerkApiUrl}/users/${userId}/verify_password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,8 +109,8 @@ export async function verifyUserPassword(userId: string, password: string) {
     body: JSON.stringify({ password }),
   });
   if (!response.ok) {
-    return false;
+    return { data: false, error: null };
   }
   const verifiedPassword = await response.json();
-  return verifiedPassword.verified;
+  return { data: verifiedPassword.verified, error: null };
 }

@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "@convex/_generated/api";
 import { internalQuery } from "@convex/_generated/server";
-import { ConvexError } from "convex/values";
 import { Doc } from "@convex/_generated/dataModel";
 import { action } from "@convex/_generated/server";
 import { createSignInToken, verifyUserPassword } from "@convex/services/clerk";
@@ -19,13 +18,14 @@ export const getUsersByRole = internalQuery({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Promise<Result<Doc<"users">[], "NOT_AUTHENTICATED">> => {
-    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED"> => {
+    const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
       return { data: null, error: "NOT_AUTHENTICATED" };
     }
+
     const users: Doc<"users">[] = await ctx.db
       .query("users")
       .filter((q) =>
@@ -45,14 +45,14 @@ export const getUserByEmail = internalQuery({
     email: v.string(),
     accountToken: v.string(),
   },
-  handler: async (ctx, args) => {
-    const account = await ctx.runQuery(internal.account.getAccountByToken, {
+  handler: async (ctx, args) : Result<Doc<"users"> | null, "ACCOUNT_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
-      throw new ConvexError("Account not found");
+      return { data: null, error: "ACCOUNT_NOT_FOUND" };
     }
-    const userPromise: Promise<Doc<"users"> | null> = ctx.db
+    const user = await ctx.db
       .query("users")
       .filter((q) =>
         q.and(
@@ -62,7 +62,7 @@ export const getUserByEmail = internalQuery({
       )
       .unique();
 
-    return await userPromise;
+    return { data: user, error: null };
   },
 });
 
@@ -71,7 +71,7 @@ export const loginWithRole = action({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Promise<Result<{ token: string }, "NOT_AUTHENTICATED" | "ROLE_NOT_FOUND_IN_ACCOUNT" | "UNEXPECTED_ERROR">> => {
+  handler: async (ctx, args) : Result<{ token: string }, "NOT_AUTHENTICATED" | "ROLE_NOT_FOUND_IN_ACCOUNT" | "UNEXPECTED_ERROR"> => {
     const { data: users, error: usersError } = await ctx.runQuery(internal.auth.getUsersByRole, {
       role: args.role,
       accountToken: args.accountToken,
@@ -83,7 +83,7 @@ export const loginWithRole = action({
       return { data: null, error: "ROLE_NOT_FOUND_IN_ACCOUNT" };
     }
 
-    const signInToken = await createSignInToken(users[0].clerkUserId);
+    const { data: signInToken } = await createSignInToken(users[0].clerkUserId);
     return { data: { token: signInToken }, error: null };
   },
 });
@@ -94,30 +94,27 @@ export const login = action({
     password: v.string(),
     accountToken: v.string(),
   },
-  handler: async (
-    ctx,
-    args
-  ): Promise<Result<{ token: string }, "INVALID_EMAIL_OR_PASSWORD" | "UNEXPECTED_ERROR">> => {
-    try {
-      const user = await ctx.runQuery(internal.auth.getUserByEmail, {
-        email: args.email,
-        accountToken: args.accountToken,
-      });
-      if (!user) {
-        return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
-      }
-      const verifiedPassword = await verifyUserPassword(
-        user.clerkUserId,
-        args.password
-      );
-      if (!verifiedPassword) {
-        return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
-      }
-      const signInToken = await createSignInToken(user.clerkUserId);
-      return { data: { token: signInToken }, error: null };
-    } catch (error) {
-      console.error(error);
-      return { data: null, error: "UNEXPECTED_ERROR" };
+  handler: async (ctx, args): Result<{ token: string }, "INVALID_EMAIL_OR_PASSWORD" | "UNEXPECTED_ERROR" | "ACCOUNT_NOT_FOUND"> => {
+    const { data: user, error: userError } = await ctx.runQuery(internal.auth.getUserByEmail, {
+      email: args.email,
+      accountToken: args.accountToken,
+    });
+    if (userError) {
+      return { data: null, error: userError };
     }
+    if (!user) {
+      return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
+    }
+
+    const { data: verifiedPassword } = await verifyUserPassword(
+      user.clerkUserId,
+      args.password
+    );
+    if (!verifiedPassword) {
+      return { data: null, error: "INVALID_EMAIL_OR_PASSWORD" };
+    }
+
+    const { data: signInToken } = await createSignInToken(user.clerkUserId);
+    return { data: { token: signInToken }, error: null };
   },
 });
