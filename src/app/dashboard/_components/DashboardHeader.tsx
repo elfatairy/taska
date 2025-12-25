@@ -12,7 +12,7 @@ export function DashboardHeader() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="sticky top-0 w-full px-5 h-(--header-height) flex justify-between items-center bg-card border-b border-border">
+    <header className="sticky top-0 w-full px-5 h-(--header-height) z-10 flex justify-between items-center bg-card border-b border-border">
       <div className="flex items-center gap-8">
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
           <Icon icon='Menu' />

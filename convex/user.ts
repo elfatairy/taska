@@ -27,7 +27,7 @@ function randomUser(): Omit<
       firstName,
       lastName,
     }),
-    avatarUrl: fakerEN.image.avatar(),
+    imageUrl: fakerEN.image.avatar(),
     role: fakerEN.helpers.arrayElement(ROLES),
     updatedAt: fakerEN.date.past().getTime(),
     isOnline: fakerEN.datatype.boolean(),
@@ -92,7 +92,7 @@ export const createUserService = internalMutation({
     user: v.object({
       name: v.string(),
       email: v.string(),
-      avatarUrl: v.string(),
+      imageUrl: v.string(),
       role: vUserRole,
       updatedAt: v.number(),
       isOnline: v.boolean(),
@@ -126,16 +126,19 @@ export const initializeUsers = async (
 
   await Promise.all(
     initialUsers.map(async (user) => {
-      const { data: { id: clerkUserId, avatarUrl } } = await createClerkUser({
+      const createClerkUserResult = await createClerkUser({
         ...user,
         password: INITIAL_USERS_PASSWORD,
       });
+      if (createClerkUserResult.error) {
+        return;  // TODO: HANDLE THE ERROR
+      }
       await ctx.runMutation(internal.user.createUserService, {
         accountId: accountId,
         user: {
           ...user,
-          clerkUserId: clerkUserId,
-          avatarUrl
+          clerkUserId: createClerkUserResult.data.id,
+          imageUrl: createClerkUserResult.data.imageUrl,
         },
       });
     })
@@ -174,18 +177,22 @@ export const createUser = action({
       updatedAt: Date.now(),
       isOnline: false,
     };
-    const { data: clerkUser } = await createClerkUser({
+    const { data: clerkUser, error: createClerkUserError } = await createClerkUser({
       name: args.user.name,
       email: args.user.email,
       password: password,
       role: args.user.role,
     });
+    if (createClerkUserError) {
+      return { data: null, error: createClerkUserError };
+    }
+    
     await ctx.runMutation(internal.user.createUserService, {
       accountId: account._id,
       user: {
         ...newUser,
         clerkUserId: clerkUser.id,
-        avatarUrl: clerkUser.avatarUrl,
+        imageUrl: clerkUser.imageUrl,
       },
     });
     return { data: password, error: null };

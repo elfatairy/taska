@@ -12,6 +12,8 @@ export default function ProfileHeaderTrigger({ className }: { className?: string
 
   if (!user) return <ProfilePlaceholderIcon />;
 
+  const initials = user.fullName?.split(" ").map(name => name[0]).join("")
+
   return (
     <div className={className}>
       <DropdownMenu>
@@ -19,7 +21,7 @@ export default function ProfileHeaderTrigger({ className }: { className?: string
           <Button className="cursor-pointer p-0" variant="ghost" size="icon">
             <Avatar className="h-9 w-9 rounded-lg">
               <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
-              <AvatarFallback className="rounded-lg">{user.firstName?.charAt(0)}{user.lastName?.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>

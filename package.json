@@ -10,6 +10,7 @@
     "icons": "npx @svgr/cli src/assets/svgs --out-dir src/components/icons --typescript --icon"
   },
   "dependencies": {
+    "@clerk/backend": "^2.29.0",
     "@clerk/nextjs": "^6.36.2",
     "@faker-js/faker": "^10.1.0",
     "@radix-ui/react-avatar": "^1.1.11",

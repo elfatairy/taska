@@ -18,11 +18,13 @@ export const usersTableColumns: ColumnDef<Doc<"users">>[] = [
     header: "Name",
     cell: ({ row }) => {
       const user = row.original
+      const initials = user.name.split(" ").map(name => name[0]).join("")
+
       return (
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src={user.avatarUrl} />
-            <AvatarFallback>{user.name.split(" ")[0][0]}{user.name.split(" ")[1][0]}</AvatarFallback>
+            <AvatarImage src={user.imageUrl} alt={user.name} />
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <p className="text-sm font-medium">{user.name}</p>

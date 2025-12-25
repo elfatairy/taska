@@ -1,9 +1,14 @@
 import { Doc } from "@convex/_generated/dataModel";
 import { Result } from "@convex/utils/types";
+import { createClerkClient } from "@clerk/backend";
+import { tryCatch } from "@/lib/try-catch";
 
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
 const clerkApiUrl = "https://api.clerk.com/v1";
 
-export async function deleteClerkUser(clerkUserId: string) : Result<void> {
+export async function deleteClerkUser(clerkUserId: string): Result<void> {
   await fetch(`${clerkApiUrl}/users/${clerkUserId}`, {
     method: "DELETE",
     headers: {
@@ -15,37 +20,30 @@ export async function deleteClerkUser(clerkUserId: string) : Result<void> {
 }
 
 export async function createClerkUser(
-  user: Pick<
-    Doc<"users">,
-    "name" | "email" | "role"
-  > & {
-    avatarUrl?: string;
+  user: Pick<Doc<"users">, "name" | "email" | "role"> & {
+    imageUrl?: string;
     password?: string;
   }
-) : Result<{ id: string; avatarUrl: string }> {
-  const response = await fetch(`${clerkApiUrl}/users`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
-    },
-    body: JSON.stringify({
-      first_name: user.name.split(" ")[0],
-      last_name: user.name.split(" ")[1],
-      email_address: [user.email],
+): Result<{ id: string; imageUrl: string }, "UNEXPECTED_ERROR"> {
+  const { data: clerkUser, error } = await tryCatch(
+    clerkClient.users.createUser({
+      firstName: user.name.split(" ")[0],
+      lastName: user.name.split(" ")[1],
+      emailAddress: [user.email],
       password: user.password,
-      public_metadata: {
+      publicMetadata: {
         role: user.role,
       },
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to create user: ${response.statusText}`);
+    })
+  );
+  if (error) {
+    return { data: null, error: "UNEXPECTED_ERROR" };
   }
-  const clerkUser = await response.json();
 
-  if (user.avatarUrl) {
-    const imageResponse = await fetch(user.avatarUrl);
+  let imageUrl = clerkUser.imageUrl;
+
+  if (user.imageUrl) {
+    const imageResponse = await fetch(user.imageUrl);
     if (!imageResponse.ok) {
       throw new Error(
         `Failed to fetch avatar image: ${imageResponse.statusText}`
@@ -53,34 +51,27 @@ export async function createClerkUser(
     }
 
     const imageBlob = await imageResponse.blob();
-    const formData = new FormData();
-    formData.append("file", imageBlob);
-
-    const uploadResponse = await fetch(
-      `https://api.clerk.com/v1/users/${clerkUser.id}/profile_image`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
-        },
-        body: formData,
-      }
+    const { data, error: uploadError } = await tryCatch(
+      clerkClient.users.updateUserProfileImage(clerkUser.id, {
+        file: imageBlob,
+      })
     );
-
-    if (!uploadResponse.ok) {
-      throw new Error(
-        `Failed to upload profile image: ${uploadResponse.statusText}`
-      );
+    if (uploadError) {
+      return { data: null, error: "UNEXPECTED_ERROR" };
     }
+    imageUrl = data.imageUrl;
   }
 
-  return { data: {
-    id: clerkUser.id,
-    avatarUrl: clerkUser.image_url,
-  }, error: null };
+  return {
+    data: {
+      id: clerkUser.id,
+      imageUrl: imageUrl,
+    },
+    error: null,
+  };
 }
 
-export async function createSignInToken(userId: string) : Result<string> {
+export async function createSignInToken(userId: string): Result<string> {
   const response = await fetch(`${clerkApiUrl}/sign_in_tokens`, {
     method: "POST",
     headers: {
@@ -99,15 +90,21 @@ export async function createSignInToken(userId: string) : Result<string> {
   return { data: signInToken.token, error: null };
 }
 
-export async function verifyUserPassword(userId: string, password: string) : Result<boolean> {
-  const response = await fetch(`${clerkApiUrl}/users/${userId}/verify_password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
-    },
-    body: JSON.stringify({ password }),
-  });
+export async function verifyUserPassword(
+  userId: string,
+  password: string
+): Result<boolean> {
+  const response = await fetch(
+    `${clerkApiUrl}/users/${userId}/verify_password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY!}`,
+      },
+      body: JSON.stringify({ password }),
+    }
+  );
   if (!response.ok) {
     return { data: false, error: null };
   }

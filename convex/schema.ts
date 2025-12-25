@@ -16,7 +16,7 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    avatarUrl: v.string(),
+    imageUrl: v.string(),
     role: vUserRole,
     isOnline: v.boolean(),
     accountId: v.id("accounts"),
