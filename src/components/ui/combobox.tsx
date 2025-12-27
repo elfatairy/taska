@@ -27,13 +27,14 @@ interface Option {
 export interface ComboboxProps {
   options: Option[];
   placeholder?: string;
+  loading?: boolean;
   emptyMessage?: string;
   id?: string;
   name?: string;
   onValueChange?: (value: string) => void;
 }
 
-export function Combobox({ options, placeholder, emptyMessage, id, name, onValueChange }: ComboboxProps) {
+export function Combobox({ options, placeholder, loading, emptyMessage, id, name, onValueChange }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
 
@@ -61,28 +62,35 @@ export function Combobox({ options, placeholder, emptyMessage, id, name, onValue
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
-                    onValueChange?.(currentValue === value ? "" : currentValue)
-                    setOpen(false)
-                  }}
-                >
-                  {option.label}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {loading ?
+              <CommandEmpty>Loading...</CommandEmpty>
+              : (
+                <>
+                  <CommandEmpty>{emptyMessage}</CommandEmpty>
+                  <CommandGroup>
+                    {options.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.value}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue === value ? "" : currentValue)
+                          onValueChange?.(currentValue === value ? "" : currentValue)
+                          setOpen(false)
+                        }}
+                      >
+                        {option.label}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            value === option.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )
+            }
           </CommandList>
         </Command>
       </PopoverContent>

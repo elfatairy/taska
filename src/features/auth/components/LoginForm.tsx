@@ -34,6 +34,7 @@ export function LoginForm() {
           <Button 
             variant="link" 
             className="h-auto text-xs py-1 mt-2 text-muted-foreground font-normal" 
+            type="button"
             onClick={(e) => {
               e.preventDefault();
               featureUnderDevelopment();

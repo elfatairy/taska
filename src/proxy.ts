@@ -12,6 +12,8 @@ import { ACCOUNT_COOKIE_NAME } from "@/lib/constants";
 const isAuthenticatedRoutes = createRouteMatcher(["/dashboard(.*)"]);
 const routesPermissions = {
   "/dashboard/manage/users": ["CTO"],
+  "/dashboard/projects": ["CTO", "Product Manager"],
+  "/dashboard/projects/new": ["CTO"],
 };
 const unauthenticatedRoutes = ["/login"];
 

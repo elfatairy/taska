@@ -9,6 +9,7 @@ import { ComboboxProps } from '@/components/ui/combobox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Combobox as ShadcnCombobox } from '@/components/ui/combobox'
 import { Checkbox as ShadcnCheckbox } from '@/components/ui/checkbox'
+import { DatePicker as ShadcnDatePicker } from '@/components/datePicker'
 import { cn } from '@/lib/utils'
 
 export function SubscribeButton({ label, loadingLabel, icon, className }: { label: string, loadingLabel?: string, icon?: React.ReactNode, className?: string }) {
@@ -84,10 +85,12 @@ export function TextField({
 export function TextArea({
   label,
   rows = 3,
+  placeholder,
   disabled,
 }: {
   label?: string
   rows?: number
+  placeholder?: string
   disabled?: boolean
 }) {
   const field = useFieldContext<string>()
@@ -103,6 +106,7 @@ export function TextArea({
         id={field.name}
         name={field.name}
         value={field.state.value}
+        placeholder={placeholder}
         onBlur={field.handleBlur}
         rows={rows}
         onChange={(e) => field.handleChange(e.target.value)}
@@ -113,7 +117,7 @@ export function TextArea({
   )
 }
 
-export function Combobox({ label, options, placeholder, emptyMessage }: ComboboxProps & { label?: string }) {
+export function Combobox({ label, options, placeholder, emptyMessage, loading }: ComboboxProps & { label?: string }) {
   const field = useFieldContext<string>()
   const errors = useStore(field.store, (state) => state.meta.errors)
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
@@ -129,6 +133,7 @@ export function Combobox({ label, options, placeholder, emptyMessage }: Combobox
         options={options}
         onValueChange={(value) => field.handleChange(value)}
         placeholder={placeholder}
+        loading={loading}
         emptyMessage={emptyMessage}
       />
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
@@ -150,6 +155,30 @@ export function Checkbox({ label, disabled, onClick }: { label?: string, disable
         onBlur={field.handleBlur}
       />
       {label && <FieldLabel htmlFor={field.name} className='font-normal'>{label}</FieldLabel>}
+    </Field>
+  )
+}
+
+export function DatePicker({ label, disabled, placeholder }: { label?: string, disabled?: boolean, placeholder?: string }) {
+  const field = useFieldContext<Date>()
+  const errors = useStore(field.store, (state) => state.meta.errors)
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+
+  return (
+    <Field className="w-full" data-invalid={isInvalid}>
+      {label && (
+        <FieldLabel htmlFor={field.name} className="text-xs text-muted-foreground">
+          {label}
+        </FieldLabel>
+      )}
+      <ShadcnDatePicker
+        id={field.name}
+        dateValue={field.state.value}
+        onChange={(date) => field.handleChange(date)}
+        disabled={disabled}
+        placeholder={placeholder}
+      />
+      {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
     </Field>
   )
 }

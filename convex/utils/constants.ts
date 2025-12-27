@@ -7,4 +7,12 @@ export const ROLES = [
   "Designer",
   "QA",
   "DevOps"
-]
+] as const;
+
+export const PROJECT_STATUS = [
+  "draft",
+  "in_progress",
+  "on_hold",
+  "cancelled",
+  "completed",
+] as const;

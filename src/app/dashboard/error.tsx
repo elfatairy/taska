@@ -16,7 +16,11 @@ interface ErrorProps {
   reset: () => void
 }
 
-export default function Error({ error, reset }: ErrorProps) {
+const defaultReset = () => {
+  window.location.reload();
+};
+
+export default function Error({ error, reset = defaultReset }: ErrorProps) {
   useEffect(() => {
     console.error('Dashboard Error:', error)
   }, [error])

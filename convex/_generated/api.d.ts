@@ -11,6 +11,7 @@
 import type * as account from "../account.js";
 import type * as account_delete from "../account/delete.js";
 import type * as auth from "../auth.js";
+import type * as project from "../project.js";
 import type * as services_clerk from "../services/clerk.js";
 import type * as user from "../user.js";
 import type * as utils_auth from "../utils/auth.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   account: typeof account;
   "account/delete": typeof account_delete;
   auth: typeof auth;
+  project: typeof project;
   "services/clerk": typeof services_clerk;
   user: typeof user;
   "utils/auth": typeof utils_auth;

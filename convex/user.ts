@@ -42,12 +42,18 @@ function randomPassword(): string {
 export const getUsersByAccountId = internalQuery({
   args: {
     accountId: v.id("accounts"),
+    role: v.optional(vUserRole),
   },
   handler: async (ctx, args) : Result<Doc<"users">[]> => {
-    const users = await ctx.db
+    let query = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("accountId"), args.accountId))
-      .collect();
+      .filter((q) => q.eq(q.field("accountId"), args.accountId));
+
+    if (args.role) {
+      query = query.filter((q) => q.eq(q.field("role"), args.role));
+    }
+
+    const users = await query.collect();
     return { data: users, error: null };
   },
 });
@@ -55,8 +61,9 @@ export const getUsersByAccountId = internalQuery({
 export const getUsers = query({
   args: {
     accountToken: v.string(),
+    role: v.optional(vUserRole),
   },
-  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "UNEXPECTED_ERROR"> => {
+  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "INVALID_ROLE" | "UNEXPECTED_ERROR"> => {
     const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
@@ -69,8 +76,15 @@ export const getUsers = query({
       return { data: null, error: identityError };
     }
 
+    if (args.role) {
+      if (!ROLES.includes(args.role as (typeof ROLES)[number])) {
+        return { data: null, error: "INVALID_ROLE" };
+      }
+    }
+
     const { data: users } = await ctx.runQuery(internal.user.getUsersByAccountId, {
       accountId: account._id,
+      role: args.role,
     });
     return { data: users, error: null };
   },
