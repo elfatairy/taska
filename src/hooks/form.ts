@@ -7,6 +7,7 @@ import {
   Combobox,
   Checkbox,
   DatePicker,
+  EditableTextField,
 } from '@/components/form-components'
 import { fieldContext, formContext } from './form-context'
 
@@ -16,7 +17,8 @@ const formHook = createFormHook({
     TextArea,
     Combobox,
     Checkbox,
-    DatePicker
+    DatePicker,
+    EditableTextField
   },
   formComponents: {
     SubscribeButton,

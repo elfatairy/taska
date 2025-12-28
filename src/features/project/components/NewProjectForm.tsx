@@ -6,9 +6,11 @@ import { useNewProjectForm } from "../hooks/useNewProjectForm";
 import { ProductManagerComboBox } from "./ProductManagerComboBox";
 import { NewProjectFormSuccess } from "./NewProjectFormSuccess";
 import { Block } from "@/features/layout/components/Block";
+import { useMemo } from "react";
 
 export function NewProjectForm() {
-  const { form, successData, error } = useNewProjectForm();
+  const { form, successData, error, defaultSlug, setDefaultSlug } = useNewProjectForm();
+  
 
   if (successData) {
     return <NewProjectFormSuccess projectId={successData.projectId} projectName={successData.projectName} projectSlug={successData.projectSlug} />;
@@ -30,7 +32,9 @@ export function NewProjectForm() {
         </div>
         <FieldGroup className="mb-3">
           <form.AppField name="name">
-            {(field) => <field.TextField label="Name" placeholder="Enter a name for the project" />}
+            {(field) => <field.TextField label="Name" placeholder="Enter a name for the project" onChange={(e) => {
+              setDefaultSlug(e.target.value.toLowerCase().replace(/ /g, "-"));
+            }} />}
           </form.AppField>
           <form.AppField name="description">
             {(field) => <field.TextArea label="Description" placeholder="Describe the project in a few sentences" />}
@@ -40,7 +44,7 @@ export function NewProjectForm() {
             {(field) => <field.TextField label="Key" placeholder="Enter a key for the project" />}
           </form.AppField>
           <form.AppField name="slug">
-            {(field) => <field.TextField label="Slug" placeholder="Enter a slug for the project" />}
+            {(field) => <field.EditableTextField label="Slug" placeholder={defaultSlug ?? "Enter a slug for the project"} />}
           </form.AppField>
           <form.AppField name="start_date">
             {(field) => <field.DatePicker label="Start Date (optional)" placeholder="Select a start date" />}
@@ -56,7 +60,7 @@ export function NewProjectForm() {
         <DialogFooter className="sm:justify-start">
           <form.AppForm>
             <div className="mt-3">
-            <form.SubscribeButton label="Create Project" loadingLabel="Creating Project..." />
+              <form.SubscribeButton label="Create Project" loadingLabel="Creating Project..." />
             </div>
           </form.AppForm>
         </DialogFooter>

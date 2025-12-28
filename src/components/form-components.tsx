@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from 'react'
 import { useStore } from '@tanstack/react-form'
 
 import { useFieldContext, useFormContext } from '@/hooks/form-context'
@@ -6,11 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea as ShadcnTextarea } from '@/components/ui/textarea'
 import { ComboboxProps } from '@/components/ui/combobox'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldContent, FieldLabel } from '@/components/ui/field'
 import { Combobox as ShadcnCombobox } from '@/components/ui/combobox'
 import { Checkbox as ShadcnCheckbox } from '@/components/ui/checkbox'
 import { DatePicker as ShadcnDatePicker } from '@/components/datePicker'
 import { cn } from '@/lib/utils'
+import { PencilIcon } from 'lucide-react';
 
 export function SubscribeButton({ label, loadingLabel, icon, className }: { label: string, loadingLabel?: string, icon?: React.ReactNode, className?: string }) {
   const form = useFormContext()
@@ -51,10 +55,12 @@ export function TextField({
   disabled,
   autoComplete,
   type,
+  onChange,
 }: {
   label?: string
   placeholder?: string
   disabled?: boolean
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   autoComplete?: React.ComponentProps<'input'>['autoComplete']
   type?: React.ComponentProps<'input'>['type']
 }) {
@@ -75,8 +81,62 @@ export function TextField({
         placeholder={placeholder}
         onBlur={field.handleBlur}
         autoComplete={autoComplete}
-        onChange={(e) => field.handleChange(e.target.value)}
+        onChange={(e) => {
+          field.handleChange(e.target.value);
+          onChange?.(e);
+        }}
       />
+      {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+    </Field>
+  )
+}
+
+export function EditableTextField({
+  label,
+  placeholder,
+  disabled,
+  autoComplete,
+  type,
+  onChange,
+}: {
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  autoComplete?: React.ComponentProps<'input'>['autoComplete']
+  type?: React.ComponentProps<'input'>['type']
+}) {
+  const field = useFieldContext<string>()
+  const errors = useStore(field.store, (state) => state.meta.errors)
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+  const [enableEditing, setEnableEditing] = useState(false);
+  
+
+  return (
+    <Field className="w-full" data-invalid={isInvalid}>
+      {
+        label && <FieldLabel htmlFor={field.name} className='text-xs text-muted-foreground'>{label}</FieldLabel>
+      }
+      <FieldContent className="relative">
+        <Input
+          id={field.name}
+          name={field.name}
+          disabled={!enableEditing || disabled}
+          value={field.state.value}
+          placeholder={placeholder}
+          onBlur={field.handleBlur}
+          autoComplete={autoComplete}
+          onChange={(e) => {
+            field.handleChange(e.target.value);
+            onChange?.(e);
+          }}
+        />
+        {
+          !enableEditing && <Button variant="ghost" size="icon" type="button" onClick={() => setEnableEditing(true)} className="absolute right-2 top-0">
+            <PencilIcon className="w-4 h-4" />
+          </Button>
+        }
+      </FieldContent>
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
     </Field>
   )
