@@ -4,6 +4,7 @@ import { requireRole } from "./utils/auth";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
+import { vProjectType } from "@convex/schema";
 
 export const getProjectsByAccountId = internalQuery({
   args: {
@@ -24,6 +25,7 @@ export const createProject = mutation({
       productManagerId: v.id("users"),
       key: v.string(),
       slug: v.string(),
+      type: vProjectType,
       start_date: v.optional(v.number()),
       target_date: v.optional(v.number()),
     }),
@@ -57,12 +59,12 @@ export const createProject = mutation({
       productManagerId: args.project.productManagerId,
       key: args.project.key,
       slug: args.project.slug,
+      type: args.project.type,
       accountId: account._id,
       updatedAt: Date.now(),
       status: projectStarted ? "in_progress" : "draft",
       is_archived: false,
       color: "#000000",
-      icon: "",
       start_date: args.project.start_date ? Date.now() : undefined,
       target_date: args.project.target_date ? Date.now() : undefined,
       completed_date: undefined,

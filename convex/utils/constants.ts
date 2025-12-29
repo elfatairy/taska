@@ -16,3 +16,13 @@ export const PROJECT_STATUS = [
   "cancelled",
   "completed",
 ] as const;
+
+export const PROJECT_TYPES = [
+  "mobile",
+  "desktop",
+  "web",
+  "backend",
+  "ai",
+  "game",
+  "other",
+] as const;

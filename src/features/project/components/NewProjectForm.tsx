@@ -6,11 +6,10 @@ import { useNewProjectForm } from "../hooks/useNewProjectForm";
 import { ProductManagerComboBox } from "./ProductManagerComboBox";
 import { NewProjectFormSuccess } from "./NewProjectFormSuccess";
 import { Block } from "@/features/layout/components/Block";
-import { useMemo } from "react";
+import { NewProjectIconRadio } from "@/features/project/components/NewProjectIconRadio";
 
 export function NewProjectForm() {
   const { form, successData, error, defaultSlug, setDefaultSlug } = useNewProjectForm();
-  
 
   if (successData) {
     return <NewProjectFormSuccess projectId={successData.projectId} projectName={successData.projectName} projectSlug={successData.projectSlug} />;
@@ -52,8 +51,8 @@ export function NewProjectForm() {
           <form.AppField name="target_date">
             {(field) => <field.DatePicker label="Target Date (optional)" placeholder="Select a target date" />}
           </form.AppField>
-          <form.AppField name="icon">
-            {(field) => <field.TextField label="Icon" placeholder="Enter an icon for the project" />}
+          <form.AppField name="type">
+            {(field) => <NewProjectIconRadio />}
           </form.AppField>
         </FieldGroup>
         {error && <div className="text-red-500 text-sm">{error}</div> /** TODO: Show a proper error ui */}

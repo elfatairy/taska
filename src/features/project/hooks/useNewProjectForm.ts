@@ -6,6 +6,7 @@ import { api } from "@convex/_generated/api";
 import { isFailure } from "@convex/utils/types";
 import { useState } from "react";
 import { z } from "zod";
+import { PROJECT_TYPES } from "@convex/utils/constants";
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -15,7 +16,7 @@ const formSchema = z.object({
   slug: z.string(),
   start_date: z.date().nullable(),
   target_date: z.date().nullable(),
-  icon: z.string().min(1),
+  type: z.enum(PROJECT_TYPES),
 })
 
 
@@ -34,7 +35,7 @@ export function useNewProjectForm() {
       slug: "",
       start_date: null as Date | null,
       target_date: null as Date | null,
-      icon: "",
+      type: "",
     },
     validators: {
       onSubmit: formSchema,
@@ -50,6 +51,7 @@ export function useNewProjectForm() {
           slug: value.slug || defaultSlug,
           start_date: value.start_date ? value.start_date.getTime() : undefined,
           target_date: value.target_date ? value.target_date.getTime() : undefined,
+          type: value.type,
         },
       });
       if (isFailure(createProjectResult)) {

@@ -13,7 +13,7 @@ const formSchema = z.object({
   lastName: z.string().min(1),
   requirePasswordChange: z.boolean(),
 })
-  
+
 export function useNewUserForm() {
   const createUser = useAccountAction(api.user.createUser);
   const [successData, setSuccessData] = useState<{ password: string } | null>(null);

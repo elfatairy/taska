@@ -30,7 +30,7 @@ export function SubscribeButton({ label, loadingLabel, icon, className }: { labe
   )
 }
 
-function ErrorMessages({
+export function ErrorMessages({
   errors,
 }: {
   errors: Array<string | { message: string }>
@@ -110,7 +110,7 @@ export function EditableTextField({
   const errors = useStore(field.store, (state) => state.meta.errors)
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
   const [enableEditing, setEnableEditing] = useState(false);
-  
+
 
   return (
     <Field className="w-full" data-invalid={isInvalid}>

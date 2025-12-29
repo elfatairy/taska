@@ -4,6 +4,9 @@ import { SidebarRoutes } from "./SidebarRoutes";
 import { api } from "@convex/_generated/api";
 import { useAccountQuery } from "@/features/account/useAccount";
 import { SidebarNavSkeleton } from "@/features/sidebar/components/SidebarSkeleton";
+import { getProjectIcon } from "@/features/project/utils/getProjectIcon";
+
+
 
 export function SidebarCTO() {
   const projectsQuery = useAccountQuery(api.project.getProjects);
@@ -31,10 +34,12 @@ export function SidebarCTO() {
             ...projectsQuery.data.map((project) => ({
               label: project.name,
               href: `/dashboard/projects/${project.slug}`,
+              icon: getProjectIcon(project.type),
             })),
             {
               label: "New Project",
               href: "/dashboard/projects/new",
+              icon: "PlusCircle" as const,
             },
           ],
         },

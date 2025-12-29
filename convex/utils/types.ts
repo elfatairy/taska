@@ -12,14 +12,14 @@ type Failure<E> = {
 
 export type Result<T, E = never> = Promise<[E] extends [never] ? Success<T> : Success<T> | Failure<E>>;
 
-export function isSuccess<T, E = never>(result: Success<T> | Failure<E> | undefined): result is Success<T> {
+export function isSuccess<T, E = never>(result: Success<T> | Failure<E | "UNEXPECTED_ERROR"> | undefined): result is Success<T> {
   if (result === undefined) {
     return false;
   }
   return result.error == null;
 }
 
-export function isFailure<T, E = never>(result: Success<T> | Failure<E> | undefined): result is Failure<E> {
+export function isFailure<T, E = never>(result: Success<T> | Failure<E | "UNEXPECTED_ERROR"> | undefined): result is Failure<E | "UNEXPECTED_ERROR"> {
   if (result === undefined) {
     return false;
   }

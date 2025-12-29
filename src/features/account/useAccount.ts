@@ -33,12 +33,12 @@ export function useAccountQuery<
     ? { ...originalArgs, accountToken }
     : ("skip" as const)) as unknown as OptionalRestArgsOrSkip<Query>[0];
 
-    try {
-      return useQuery(query, newArgs);
-    } catch (error) {
-      console.error(error);
-      return { data: null, error: "UNEXPECTED_ERROR" } as const;
-    }
+  try {
+    return useQuery(query, newArgs);
+  } catch (error) {
+    console.error(error);
+    return { data: null, error: "UNEXPECTED_ERROR" as const };
+  }
 }
 
 export function useAccountMutation<
@@ -57,7 +57,7 @@ export function useAccountMutation<
       return originalMutation({ ...args, accountToken });
     } catch (error) {
       console.error(error);
-      return { data: null, error: "UNEXPECTED_ERROR" } as const;
+      return { data: null, error: "UNEXPECTED_ERROR" as const };
     }
   };
 }
@@ -78,7 +78,7 @@ export function useAccountAction<Action extends FunctionReference<"action">>(
       return originalAction({ ...args, accountToken });
     } catch (error) {
       console.error(error);
-      return { data: null, error: "UNEXPECTED_ERROR" } as const;
+      return { data: null, error: "UNEXPECTED_ERROR" as const };
     }
   };
 }

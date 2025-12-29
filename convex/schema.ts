@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { PROJECT_STATUS, ROLES } from "@convex/utils/constants";
+import { PROJECT_STATUS, PROJECT_TYPES, ROLES } from "@convex/utils/constants";
 
 export const vUserRole = v.union(
   v.literal("CTO" as const),
@@ -9,6 +9,10 @@ export const vUserRole = v.union(
 
 export const vProjectStatus = v.union(
   ...PROJECT_STATUS.map(status => v.literal(status)),
+)
+
+export const vProjectType = v.union(
+  ...PROJECT_TYPES.map(type => v.literal(type)),
 )
 
 export default defineSchema({
@@ -39,7 +43,7 @@ export default defineSchema({
     completed_date: v.optional(v.number()),
     is_archived: v.boolean(),
     color: v.string(),
-    icon: v.string(),
+    type: vProjectType,
     accountId: v.id("accounts"),
     updatedAt: v.number(),
   }),

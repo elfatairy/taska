@@ -18,7 +18,7 @@ const formHook = createFormHook({
     Combobox,
     Checkbox,
     DatePicker,
-    EditableTextField
+    EditableTextField,
   },
   formComponents: {
     SubscribeButton,
