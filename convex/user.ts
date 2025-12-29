@@ -10,7 +10,7 @@ import { internal } from "@convex/_generated/api";
 import { Doc, Id } from "@convex/_generated/dataModel";
 import { v } from "convex/values";
 import { vUserRole } from "@convex/schema";
-import { createClerkUser } from "@convex/services/clerk";
+import { createClerkUser, setClerkConvexUserId } from "@convex/services/clerk";
 import { INITIAL_USERS_PASSWORD, ROLES } from "@convex/utils/constants";
 import { Result } from "./utils/types";
 import { requireRole } from "./utils/auth";
@@ -147,7 +147,7 @@ export const initializeUsers = async (
       if (createClerkUserResult.error) {
         return;  // TODO: HANDLE THE ERROR
       }
-      await ctx.runMutation(internal.user.createUserService, {
+      const createUserResult = await ctx.runMutation(internal.user.createUserService, {
         accountId: accountId,
         user: {
           ...user,
@@ -155,6 +155,7 @@ export const initializeUsers = async (
           imageUrl: createClerkUserResult.data.imageUrl,
         },
       });
+      await setClerkConvexUserId(createClerkUserResult.data.id, createUserResult.data);
     })
   );
 
@@ -201,14 +202,15 @@ export const createUser = action({
       return { data: null, error: createClerkUserError };
     }
     
-    await ctx.runMutation(internal.user.createUserService, {
+    const createUserResult = await ctx.runMutation(internal.user.createUserService, {
       accountId: account._id,
       user: {
         ...newUser,
         clerkUserId: clerkUser.id,
         imageUrl: clerkUser.imageUrl,
       },
-    });
+    })
+    await setClerkConvexUserId(clerkUser.id, createUserResult.data);
     return { data: password, error: null };
   },
 });

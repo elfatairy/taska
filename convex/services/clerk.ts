@@ -71,6 +71,21 @@ export async function createClerkUser(
   };
 }
 
+export async function setClerkConvexUserId(clerkUserId: string, convexUserId: string): Result<void, "UNEXPECTED_ERROR"> {
+  const { error } = await tryCatch(
+    clerkClient.users.updateUserMetadata(clerkUserId, {
+      publicMetadata: {
+        convexUserId: convexUserId,
+      },
+    })
+  );
+  if (error) {
+    return { data: null, error: "UNEXPECTED_ERROR" };
+  }
+
+  return { data: undefined, error: null };
+}
+
 export async function createSignInToken(userId: string): Result<string> {
   const response = await fetch(`${clerkApiUrl}/sign_in_tokens`, {
     method: "POST",

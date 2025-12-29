@@ -1,6 +1,7 @@
-import { SidebarNav } from "../types";
+import type { SidebarNav as SidebarNavType } from "../types";
+import { SidebarRoutes } from "./SidebarRoutes";
 
-export const UserRoutes: SidebarNav = [
+const UserRoutes: SidebarNavType = [
   {
     label: "Primary Navigation",
     routes: [
@@ -47,3 +48,9 @@ export const UserRoutes: SidebarNav = [
     ],
   },
 ]
+
+export function SidebarUser() {
+  return (
+    <SidebarRoutes routes={UserRoutes} />
+  )
+}

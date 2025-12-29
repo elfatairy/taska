@@ -11,9 +11,16 @@ export const getAccountByToken = internalQuery({
   args: {
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Result<Doc<"accounts"> | null> => {
+  handler: async (ctx, args): Result<Doc<"accounts"> | null> => {
     const account = await ctx.db.query("accounts").filter((q) => q.eq(q.field("accountToken"), args.accountToken)).first();
     return { data: account, error: null };
+  }
+})
+
+export const getAccounts = internalQuery({
+  handler: async (ctx): Result<Doc<"accounts">[]> => {
+    const accounts = await ctx.db.query("accounts").filter((q) => q.eq(q.field("deletedAt"), undefined)).collect();
+    return { data: accounts, error: null };
   }
 })
 
@@ -21,7 +28,7 @@ export const createAccount = internalMutation({
   args: {
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Result<Id<"accounts">> => {
+  handler: async (ctx, args): Result<Id<"accounts">> => {
     const accountId = await ctx.db.insert("accounts", {
       accountToken: args.accountToken,
       isAnonymous: true,
