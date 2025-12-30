@@ -65,8 +65,8 @@ export const createProject = mutation({
       status: projectStarted ? "in_progress" : "draft",
       is_archived: false,
       color: "#000000",
-      start_date: args.project.start_date ? Date.now() : undefined,
-      target_date: args.project.target_date ? Date.now() : undefined,
+      start_date: args.project.start_date ?? undefined,
+      target_date: args.project.target_date ?? undefined,
       completed_date: undefined,
     } satisfies Omit<Doc<"projects">, "_id" | "_creationTime">;
 
@@ -89,7 +89,7 @@ export const getProjects = query({
   handler: async (
     ctx,
     args
-  ): Result<Doc<"projects">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"> => {
+  ): Result<(Doc<"projects"> & { productManager: Doc<"users"> | null })[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"> => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -117,7 +117,19 @@ export const getProjects = query({
     }
 
     const projects = await query.collect();
-    return { data: projects, error: null };
+    const projectWithProductManager = (await Promise.allSettled(
+      projects.map(async (project) => ({
+        ...project,
+        productManager: project.productManagerId ? await ctx.db.get("users", project.productManagerId) : null,
+      })),
+    )).map((result) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      }
+      return null;
+    }).filter((project) => project !== null);
+
+    return { data: projectWithProductManager, error: null };
   },
 });
 

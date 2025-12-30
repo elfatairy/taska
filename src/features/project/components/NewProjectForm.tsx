@@ -7,8 +7,18 @@ import { ProductManagerComboBox } from "./ProductManagerComboBox";
 import { NewProjectFormSuccess } from "./NewProjectFormSuccess";
 import { Block } from "@/features/layout/components/Block";
 import { NewProjectIconRadio } from "@/features/project/components/NewProjectIconRadio";
+import { slugify } from "@convex/utils/slugify";
+import { usePathname } from "next/navigation";
 
 export function NewProjectForm() {
+  const pathname = usePathname();
+
+  return (
+    <NewProjectFormContent key={pathname} />
+  )
+}
+
+function NewProjectFormContent() {
   const { form, successData, error, defaultSlug, setDefaultSlug } = useNewProjectForm();
 
   if (successData) {
@@ -32,7 +42,7 @@ export function NewProjectForm() {
         <FieldGroup className="mb-3">
           <form.AppField name="name">
             {(field) => <field.TextField label="Name" placeholder="Enter a name for the project" onChange={(e) => {
-              setDefaultSlug(e.target.value.toLowerCase().replace(/ /g, "-"));
+              setDefaultSlug(slugify(e.target.value));
             }} />}
           </form.AppField>
           <form.AppField name="description">
@@ -66,4 +76,5 @@ export function NewProjectForm() {
       </form>
     </Block>
   )
+
 }

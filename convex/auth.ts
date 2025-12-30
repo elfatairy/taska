@@ -9,7 +9,7 @@ import { Result } from "@convex/utils/types";
 const vLoginRole = v.union(
   v.literal("Product Manager"),
   v.literal("Team Lead"),
-  v.literal("Developer"),
+  v.literal("Frontend Developer"),
   v.literal("CTO")
 );
 

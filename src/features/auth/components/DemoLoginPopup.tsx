@@ -22,7 +22,6 @@ const roles: Role[] = [
   {
     label: "Product Manager",
     value: "Product Manager" as const,
-    locked: true,
   },
   {
     label: "Team Lead",
@@ -30,9 +29,8 @@ const roles: Role[] = [
     locked: true,
   },
   {
-    label: "Developer",
-    value: "Developer" as const,
-    locked: true,
+    label: "Frontend Developer",
+    value: "Frontend Developer" as const,
   }
 ]
 

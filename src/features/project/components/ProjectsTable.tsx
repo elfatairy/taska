@@ -4,22 +4,26 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
 import { useState } from "react"
-import { NewUserDialog } from "./NewUserDialog"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { User } from "./UsersTableColumns"
-import { UsersTableSkeleton } from "./UsersTableSkeleton"
+import { Project } from "./ProjectsTableColumns"
+import { ProjectsTableSkeleton } from "./ProjectsTableSkeleton"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { PlusIcon } from "lucide-react"
+import Link from "next/link"
+import { useUser } from "@clerk/nextjs"
 
-interface UsersTableProps {
-  columns: ColumnDef<User>[]
+interface ProjectsTableProps {
+  columns: ColumnDef<Project>[]
 }
 
-export function UsersTable({
+export function ProjectsTable({
   columns,
-}: UsersTableProps) {
+}: ProjectsTableProps) {
+  const { user } = useUser();
   const router = useRouter();
-  const queryResult = useAccountQuery(api.user.getUsers);
+  const queryResult = useAccountQuery(api.project.getProjects);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const data = queryResult?.data || [];
@@ -36,9 +40,9 @@ export function UsersTable({
   })
 
   if (!queryResult) {
-    return <UsersTableSkeleton />;
+    return <ProjectsTableSkeleton />;
   }
-  
+
   if (queryResult.error) {
     throw new Error(queryResult.error);
   }
@@ -47,14 +51,20 @@ export function UsersTable({
     <div className="overflow-hidden ">
       <div className="flex items-center justify-between p-4">
         <Input
-          placeholder="Search by name or email..."
-          value={(table.getColumn("name_email")?.getFilterValue() as string) ?? ""}
+          placeholder="Search by name or key..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name_email")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm w-full"
         />
-        <NewUserDialog />
+        {user?.publicMetadata.role === "CTO" && (
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/projects/new">
+              <PlusIcon className="w-4 h-4" />New Project
+            </Link>
+          </Button>
+        )}
       </div>
       <Table>
         <TableHeader className="border-t">
@@ -82,7 +92,7 @@ export function UsersTable({
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 className="cursor-pointer"
-                onClick={() => router.push(`/dashboard/manage/users/${row.original.profile_slug}`)}
+                onClick={() => router.push(`/dashboard/projects/${row.original.slug}`)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

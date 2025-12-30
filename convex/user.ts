@@ -14,6 +14,7 @@ import { createClerkUser, setClerkConvexUserId } from "@convex/services/clerk";
 import { INITIAL_USERS_PASSWORD, ROLES } from "@convex/utils/constants";
 import { Result } from "./utils/types";
 import { requireRole } from "./utils/auth";
+import { slugify } from "@convex/utils/slugify";
 
 function randomUser(): Omit<
   Doc<"users">,
@@ -106,6 +107,7 @@ export const createUserService = internalMutation({
     user: v.object({
       name: v.string(),
       email: v.string(),
+      profile_slug: v.string(),
       imageUrl: v.string(),
       role: vUserRole,
       updatedAt: v.number(),
@@ -151,6 +153,7 @@ export const initializeUsers = async (
         accountId: accountId,
         user: {
           ...user,
+          profile_slug: slugify(user.name),
           clerkUserId: createClerkUserResult.data.id,
           imageUrl: createClerkUserResult.data.imageUrl,
         },
@@ -187,6 +190,7 @@ export const createUser = action({
     const password = randomPassword()
     const newUser = {
       name: args.user.name,
+      profile_slug: slugify(args.user.name),
       email: args.user.email,
       role: args.user.role,
       updatedAt: Date.now(),

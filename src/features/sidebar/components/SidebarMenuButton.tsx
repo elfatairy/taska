@@ -32,6 +32,8 @@ export function SidebarMenuSubButton({ route, ...props }: NavLinkProps) {
   )
 }
 
+const MAX_LENGTH = 16;
+
 const SidebarNavLink = ({ route, ...props }: NavLinkProps) => {
   const { toggleSidebar, isMobile } = useSidebar();
   
@@ -40,7 +42,7 @@ const SidebarNavLink = ({ route, ...props }: NavLinkProps) => {
     return (
       <div className="gap-4" {...props}>
         {route.icon && <Icon icon={route.icon} size={20} strokeWidth={0} className="fill-none" />}
-        {route.label}
+        {route.label.length > MAX_LENGTH ? `${route.label.slice(0, MAX_LENGTH)}...` : route.label}
       </div>
     )
   }
@@ -57,7 +59,7 @@ const SidebarNavLink = ({ route, ...props }: NavLinkProps) => {
       }}
     >
       {route.icon && <Icon icon={route.icon} size={20} strokeWidth={0} className="fill-none" />}
-      {route.label}
+      {route.label.length > MAX_LENGTH ? `${route.label.slice(0, MAX_LENGTH)}...` : route.label}
     </Link>
   )
 }

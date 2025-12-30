@@ -16,6 +16,7 @@ import type * as services_clerk from "../services/clerk.js";
 import type * as user from "../user.js";
 import type * as utils_auth from "../utils/auth.js";
 import type * as utils_constants from "../utils/constants.js";
+import type * as utils_slugify from "../utils/slugify.js";
 import type * as utils_types from "../utils/types.js";
 
 import type {
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   user: typeof user;
   "utils/auth": typeof utils_auth;
   "utils/constants": typeof utils_constants;
+  "utils/slugify": typeof utils_slugify;
   "utils/types": typeof utils_types;
 }>;
 

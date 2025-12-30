@@ -5,6 +5,7 @@ import type { SidebarNav } from "../types";
 import { api } from "@convex/_generated/api";
 import { SidebarNavSkeleton } from "@/features/sidebar/components/SidebarSkeleton";
 import { SidebarRoutes } from "@/features/sidebar/components/SidebarRoutes";
+import { getProjectIcon } from "@/features/project/utils/getProjectIcon";
 
 export function SidebarPM() {
   const projectsQuery = useAccountQuery(api.project.getProjects);
@@ -42,6 +43,7 @@ export function SidebarPM() {
             ...projectsQuery.data.map((project) => ({
               label: project.name,
               href: `/dashboard/projects/${project.slug}`,
+              icon: getProjectIcon(project.type),
               children: [
                 {
                   label: "Discussions",
