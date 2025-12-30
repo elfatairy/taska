@@ -56,6 +56,7 @@ export function ProjectsTable({
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
+          autoFocus
           className="max-w-sm w-full"
         />
         {user?.publicMetadata.role === "CTO" && (

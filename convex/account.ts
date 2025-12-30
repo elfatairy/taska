@@ -4,6 +4,7 @@ import { initializeUsers } from "@convex/user";
 import { internal } from "@convex/_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
+import { initializeProjects } from "./project";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 
@@ -55,7 +56,8 @@ export const initializeAccount = action({
     });
 
     await initializeUsers(ctx, result.data!);
-
+    await initializeProjects(ctx, result.data!);
+    
     return { data: undefined, error: null };
   }
 })

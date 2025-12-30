@@ -1,10 +1,11 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { ActionCtx, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { requireRole } from "./utils/auth";
 import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
-import { vProjectType } from "@convex/schema";
+import { vProjectStatus, vProjectType } from "@convex/schema";
+import { createClerkUser } from "./services/clerk";
 
 export const getProjectsByAccountId = internalQuery({
   args: {
@@ -13,6 +14,44 @@ export const getProjectsByAccountId = internalQuery({
   handler: async (ctx, args): Result<Doc<"projects">[]> => {
     const projects = await ctx.db.query("projects").filter((q) => q.eq(q.field("accountId"), args.accountId)).collect();
     return { data: projects, error: null };
+  }
+})
+
+export const createProjectService = internalMutation({
+  args: {
+    accountId: v.id("accounts"),
+    project: v.object({
+      name: v.string(),
+      description: v.string(),
+      productManagerId: v.optional(v.id("users")),
+      key: v.string(),
+      slug: v.string(),
+      type: vProjectType,
+      color: v.string(),
+      status: vProjectStatus,
+      start_date: v.optional(v.number()),
+      target_date: v.optional(v.number())
+    }),
+  },
+  handler: async (ctx, args): Result<Id<"projects">> => {
+    const newProject = {
+      name: args.project.name,
+      description: args.project.description,
+      productManagerId: args.project.productManagerId,
+      key: args.project.key,
+      slug: args.project.slug,
+      type: args.project.type,
+      accountId: args.accountId,
+      updatedAt: Date.now(),
+      status: args.project.status,
+      is_archived: false,
+      color: args.project.color,
+      start_date: args.project.start_date ?? undefined,
+      target_date: args.project.target_date ?? undefined,
+    } satisfies Omit<Doc<"projects">, "_id" | "_creationTime">;
+
+    const projectId = await ctx.db.insert("projects", newProject);
+    return { data: projectId, error: null };
   }
 })
 
@@ -53,29 +92,23 @@ export const createProject = mutation({
       ? Date.now() >= args.project.start_date
       : false;
 
-    const newProject = {
-      name: args.project.name,
-      description: args.project.description,
-      productManagerId: args.project.productManagerId,
-      key: args.project.key,
-      slug: args.project.slug,
-      type: args.project.type,
+    const createProjectResult = await ctx.runMutation(internal.project.createProjectService, {
       accountId: account._id,
-      updatedAt: Date.now(),
-      status: projectStarted ? "in_progress" : "draft",
-      is_archived: false,
-      color: "#000000",
-      start_date: args.project.start_date ?? undefined,
-      target_date: args.project.target_date ?? undefined,
-      completed_date: undefined,
-    } satisfies Omit<Doc<"projects">, "_id" | "_creationTime">;
+      project: {
+        ...args.project,
+        status: projectStarted ? "in_progress" : "draft",
+        color: "#000000",
+      },
+    });
+    if (createProjectResult.error) {
+      return { data: null, error: createProjectResult.error };
+    }
 
-    const projectId = await ctx.db.insert("projects", newProject);
     return {
       data: {
-        projectId,
-        projectName: newProject.name,
-        projectSlug: newProject.slug,
+        projectId: createProjectResult.data,
+        projectName: args.project.name,
+        projectSlug: args.project.slug,
       },
       error: null,
     };
@@ -142,3 +175,81 @@ export const deleteProject = internalMutation({
     return { data: undefined, error: null };
   }
 })
+
+export const initializeProjects = async (
+  ctx: ActionCtx,
+  accountId: Doc<"accounts">["_id"]
+) : Result<void, "PRODUCT_MANAGER_NOT_FOUND"> => {
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  const productManagerResult = await ctx.runQuery(internal.user.getUsersByAccountId, {
+    accountId: accountId,
+    role: "Product Manager",
+  });
+  if (productManagerResult.error) {
+    return { data: null, error: productManagerResult.error };
+  }
+  if (!productManagerResult.data?.length) {
+    return { data: null, error: "PRODUCT_MANAGER_NOT_FOUND" };
+  }
+
+  const getRandomPM = () => {
+    // TODO: Get the initially specified PM from the database instead of randomizing
+    return productManagerResult.data[Math.floor(Math.random() * productManagerResult.data.length)]._id;
+  }
+  
+  const initialProjects = [
+    {
+      name: "Mobile App Development",
+      description: "Development of the new mobile application for iOS and Android platforms with cross-platform compatibility using React Native. The app will feature user authentication, real-time notifications, offline mode capabilities, and seamless integration with our existing backend services. This project aims to expand our reach to mobile users and provide a native app experience with high performance and intuitive UI/UX design.",
+      key: "MAD",
+      slug: "mobile-app-development",
+      type: "mobile" as const,
+      color: "#3B82F6",
+      status: "in_progress" as const,
+      start_date: now - (30 * oneDay),
+      target_date: now + (120 * oneDay),
+      productManagerId: getRandomPM(),
+    },
+    {
+      name: "Website Redesign",
+      description: "Complete redesign of the company website with modern UI/UX principles, focusing on accessibility, responsive design, and improved user engagement. This project includes a comprehensive audit of the current site, competitor analysis, user research, wireframing, prototyping, and implementation using Next.js and Tailwind CSS. The new design will feature improved navigation, faster load times, better SEO optimization, and a cohesive brand identity across all pages.",
+      key: "WRD",
+      slug: "website-redesign",
+      type: "web" as const,
+      color: "#8B5CF6",
+      status: "draft" as const,
+      start_date: now + (14 * oneDay),
+      target_date: now + (14 * oneDay) + (90 * oneDay),
+      productManagerId: getRandomPM(),
+    },
+    {
+      name: "Customer Dashboard",
+      description: "Building a comprehensive customer analytics and reporting dashboard that provides real-time insights into user behavior, engagement metrics, and business performance indicators. The dashboard will feature interactive charts, customizable widgets, data export capabilities, and advanced filtering options. It will integrate with multiple data sources including our CRM, analytics platform, and sales database to provide a unified view of customer data and actionable insights for decision-making.",
+      key: "CD",
+      slug: "customer-dashboard",
+      type: "web" as const,
+      color: "#10B981",
+      status: "draft" as const,
+      start_date: now + (28 * oneDay),
+      target_date: now + (28 * oneDay) + (75 * oneDay),
+      productManagerId: getRandomPM(),
+    },
+  ];
+  
+  await Promise.all(
+    initialProjects.map(async (project) => {
+      const createProjectResult = await ctx.runMutation(internal.project.createProjectService, {
+        accountId: accountId,
+        project
+      });
+      if (createProjectResult.error) {
+        return;  // TODO: HANDLE THE ERROR
+      }
+      return createProjectResult.data;
+    })
+  );
+
+  return { data: undefined, error: null };
+};

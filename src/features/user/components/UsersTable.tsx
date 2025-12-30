@@ -52,6 +52,7 @@ export function UsersTable({
           onChange={(event) =>
             table.getColumn("name_email")?.setFilterValue(event.target.value)
           }
+          autoFocus
           className="max-w-sm w-full"
         />
         <NewUserDialog />
