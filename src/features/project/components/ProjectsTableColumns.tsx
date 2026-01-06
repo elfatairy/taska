@@ -11,6 +11,7 @@ import { getStatusBadgeVariant, formatStatusText } from "../utils/projectStatus"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDuration } from "../utils/formatDuration"
 import { ProjectsTableActions } from "./ProjectsTableActions"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export type Project = Doc<"projects"> & { productManager: Doc<"users"> | null }
 
@@ -47,13 +48,18 @@ export const projectsTableColumns: ColumnDef<Project>[] = [
       if (!project.productManager) {
         return <p className="text-sm font-medium">Unassigned</p>
       }
-      return <Link
-        href={`/dashboard/manage/users/${project.productManager.profile_slug}`}
-        className="text-sm font-medium"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {project.productManager.name}
-      </Link>
+      return (
+        <Link href={`/dashboard/manage/users/${project.productManager.profile_slug}`} className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <Avatar>
+            <AvatarImage src={project.productManager.imageUrl} alt={project.productManager.name} />
+            <AvatarFallback>{project.productManager.name.split(" ").map(name => name[0]).join("")}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <p className="text-sm font-medium">{project.productManager.name}</p>
+            <p className="text-xs text-muted-foreground">{project.productManager.email}</p>
+          </div>
+        </Link>
+      )
     }
   },
   {

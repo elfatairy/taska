@@ -58,6 +58,10 @@ export function SidebarCTO() {
               href: "/dashboard/manage/users",
             },
             {
+              label: "Teams",
+              href: "/dashboard/manage/teams",
+            },
+            {
               label: "Notifications",
               href: "/dashboard/manage/notifications",
             },

@@ -12,7 +12,7 @@ export const Icon: React.FC<IconProps> = ({ icon, size, className, ...props }) =
   const Component = React.createElement(Icons[icon as keyof typeof Icons], { ...props, ...(size && { width: size, height: size }), className });
 
   return (
-    <span className={cn("custom-icon", className)}>
+    <span className={cn("custom-icon")}>
       {Component}
     </span>
   );

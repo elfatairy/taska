@@ -14,6 +14,7 @@ const routesPermissions = {
   "/dashboard/manage/users": ["CTO"],
   "/dashboard/projects": ["CTO", "Product Manager"],
   "/dashboard/projects/new": ["CTO"],
+  "/dashboard/manage/teams": ["CTO", "Product Manager"],
 };
 const unauthenticatedRoutes = ["/login"];
 

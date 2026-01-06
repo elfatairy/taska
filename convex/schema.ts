@@ -48,4 +48,31 @@ export default defineSchema({
     accountId: v.id("accounts"),
     updatedAt: v.number(),
   }),
+  teams: defineTable({
+    name: v.string(),
+    description: v.string(),
+    slug: v.string(),
+    team_lead_id: v.optional(v.id("users")),
+    accountId: v.id("accounts"),
+    updatedAt: v.number(),
+  }),
+  team_members: defineTable({
+    teamId: v.id("teams"),
+    userId: v.id("users"),
+    role: v.union(
+      v.literal("team_lead" as const),
+      v.literal("member" as const),
+    ),
+    is_primary: v.boolean(),
+    updatedAt: v.number(),
+  }),
+  team_projects: defineTable({
+    team_id: v.id("teams"),
+    project_id: v.id("projects"),
+    assigned_at: v.number(),
+    assigned_by: v.id("users"),
+    unassigned_at: v.optional(v.number()),
+    unassigned_by: v.optional(v.id("users")),
+    updated_at: v.number(),
+  }),
 });
