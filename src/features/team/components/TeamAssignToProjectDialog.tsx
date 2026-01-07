@@ -79,7 +79,6 @@ export function TeamAssignToProjectDialogContent({ teamsIds }: { teamsIds: TeamI
             No projects found
           </div>
         ) : (
-          // filteredProjects.slice(0, 5).map((project) => {
           filteredProjects.map((project) => {
             const assignedTeamsCount = Object.values(teamsProjectsQuery.data).filter((teamProjects) => teamProjects.map((teamProject) => teamProject.project._id).includes(project._id)).length;
             return <TeamAssignToProjectDialogItem key={project._id} project={project} teamsIds={teamsIds} assignedTeamsCount={assignedTeamsCount} />

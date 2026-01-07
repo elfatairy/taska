@@ -6,16 +6,18 @@ import { internal } from "./_generated/api";
 import { getUserIdentity, requireRole } from "./utils/auth";
 import { ROLES } from "./utils/constants";
 
-type Team = Doc<"teams"> & {
+type Team = Doc<"teams">;
+
+type PopulatedTeam = Team & {
   memberIds: Doc<"users">["_id"][];
   teamLead: Doc<"users"> | null;
   projectIds: Doc<"projects">["_id"][];
-}
+};
 
 type TeamProject = Doc<"team_projects"> & {
   project: Doc<"projects">;
   productManager: Doc<"users"> | null;
-}
+};
 
 export const getTeams = query({
   args: {
@@ -24,7 +26,7 @@ export const getTeams = query({
   handler: async (
     ctx,
     args
-  ): Result<Team[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"> => {
+  ): Result<PopulatedTeam[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED"> => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -90,6 +92,73 @@ export const getTeams = query({
   },
 });
 
+export const getTeamBySlug = query({
+  args: {
+    accountToken: v.string(),
+    teamSlug: v.string(),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<
+    PopulatedTeam,
+    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"
+  > => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const identityError = (await requireRole(ctx, ["CTO", "Product Manager"]))
+      .error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const team = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("slug"), args.teamSlug))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+
+    if (!team) {
+      return { data: null, error: "TEAM_NOT_FOUND" };
+    }
+
+    const teamMembers = await ctx.db
+      .query("team_members")
+      .filter((q) => q.eq(q.field("teamId"), team._id))
+      .collect();
+
+    const teamProjects = await ctx.db
+      .query("team_projects")
+      .filter((q) => q.eq(q.field("team_id"), team._id))
+      .filter((q) => q.eq(q.field("unassigned_at"), undefined))
+      .collect();
+
+    const teamLead = team.team_lead_id
+      ? await ctx.db
+          .query("users")
+          .filter((q) => q.eq(q.field("_id"), team.team_lead_id))
+          .unique()
+      : null;
+
+    const populatedTeam = {
+      ...team,
+      memberIds: teamMembers.map((member) => member.userId),
+      projectIds: teamProjects.map((project) => project.project_id),
+      teamLead,
+    };
+
+    return { data: populatedTeam, error: null };
+  },
+});
+
 export const getTeamMembers = query({
   args: {
     accountToken: v.string(),
@@ -98,7 +167,10 @@ export const getTeamMembers = query({
   handler: async (
     ctx,
     args
-  ): Result<(Doc<"team_members"> & { user: Doc<"users"> })[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"> => {
+  ): Result<
+    (Doc<"team_members"> & { user: Doc<"users"> })[],
+    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"
+  > => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -131,7 +203,9 @@ export const getTeamMembers = query({
     const isNormalUser = !["CTO", "Product Manager"].includes(
       identity.role as (typeof ROLES)[number]
     );
-    const isTeamMember = teamMembers.map((member) => member.userId).includes(identity.convexUserId as Id<"users">);
+    const isTeamMember = teamMembers
+      .map((member) => member.userId)
+      .includes(identity.convexUserId as Id<"users">);
 
     if (isNormalUser && !isTeamMember) {
       return { data: null, error: "TEAM_NOT_FOUND" };
@@ -170,7 +244,10 @@ export const getTeamProjects = query({
   handler: async (
     ctx,
     args
-  ): Result<TeamProject[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"> => {
+  ): Result<
+    TeamProject[],
+    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"
+  > => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -203,7 +280,9 @@ export const getTeamProjects = query({
     const isNormalUser = !["CTO", "Product Manager"].includes(
       identity.role as (typeof ROLES)[number]
     );
-    const isTeamMember = teamMembers.map((member) => member.userId).includes(identity.convexUserId as Id<"users">);
+    const isTeamMember = teamMembers
+      .map((member) => member.userId)
+      .includes(identity.convexUserId as Id<"users">);
 
     if (isNormalUser && !isTeamMember) {
       return { data: null, error: "TEAM_NOT_FOUND" };
@@ -220,8 +299,8 @@ export const getTeamProjects = query({
         teamProjects.map(async (teamProject) => {
           const project = await ctx.db.get(teamProject.project_id);
           if (!project) return null;
-          
-          const productManager = project.productManagerId 
+
+          const productManager = project.productManagerId
             ? await ctx.db.get(project.productManagerId)
             : null;
 
@@ -253,7 +332,13 @@ export const getTeamsProjects = query({
     teamsIds: v.array(v.id("teams")),
     accountToken: v.string(),
   },
-  handler: async (ctx, args): Result<Record<Id<'teams'>, TeamProject[]>, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"> => {
+  handler: async (
+    ctx,
+    args
+  ): Result<
+    Record<Id<"teams">, TeamProject[]>,
+    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"
+  > => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -264,12 +349,13 @@ export const getTeamsProjects = query({
       return { data: null, error: "NOT_AUTHENTICATED" };
     }
 
-    const identityError = (await requireRole(ctx, ["CTO", "Product Manager"])).error;
+    const identityError = (await requireRole(ctx, ["CTO", "Product Manager"]))
+      .error;
     if (identityError) {
       return { data: null, error: identityError };
     }
 
-    const teamsProjects: Record<Id<'teams'>, TeamProject[]> = {};
+    const teamsProjects: Record<Id<"teams">, TeamProject[]> = {};
 
     for (const teamId of args.teamsIds) {
       const team = await ctx.db
@@ -292,11 +378,11 @@ export const getTeamsProjects = query({
           teamProjects.map(async (teamProject) => {
             const project = await ctx.db.get(teamProject.project_id);
             if (!project) return null;
-            
-            const productManager = project.productManagerId 
+
+            const productManager = project.productManagerId
               ? await ctx.db.get(project.productManagerId)
               : null;
-  
+
             return {
               ...teamProject,
               project,
@@ -323,13 +409,24 @@ export const getTeamsProjects = query({
   },
 });
 
-export const assignTeamsToProject = mutation({
+export const createTeam = mutation({
   args: {
-    teamsIds: v.array(v.id("teams")),
-    projectId: v.id("projects"),
     accountToken: v.string(),
+    team: v.object({
+      name: v.string(),
+      description: v.string(),
+      slug: v.string(),
+      membersIds: v.array(v.id("users")),
+      teamLeadId: v.optional(v.id("users")),
+    }),
   },
-  handler: async (ctx, args): Result<void, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND" | "PROJECT_NOT_FOUND"> => {
+  handler: async (
+    ctx,
+    args
+  ): Result<
+    Pick<Doc<"teams">, "name" | "slug"> & { _id: Id<"teams"> },
+    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_ALREADY_EXISTS"
+  > => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -340,7 +437,81 @@ export const assignTeamsToProject = mutation({
       return { data: null, error: "NOT_AUTHENTICATED" };
     }
 
-    const { data: identity, error: identityError } = await requireRole(ctx, ["CTO", "Product Manager"]);
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const existingTeam = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .filter((q) =>
+        q.or(q.eq(q.field("slug"), args.team.slug), q.eq(q.field("name"), args.team.name))
+      )
+      .first();
+    if (existingTeam) {
+      return { data: null, error: "TEAM_ALREADY_EXISTS" };
+    }
+
+    const newTeam = {
+      name: args.team.name,
+      description: args.team.description,
+      slug: args.team.slug,
+      team_lead_id: args.team.teamLeadId ?? undefined,
+      accountId: account._id,
+      updatedAt: Date.now(),
+    };
+    const teamId = await ctx.db.insert("teams", newTeam);
+
+    await Promise.all(
+      args.team.membersIds.map(async (memberId) => {
+        ctx.db.insert("team_members", {
+          teamId,
+          userId: memberId,
+          role: memberId === args.team.teamLeadId ? "team_lead" : "member",
+          is_primary: false, // TODO: Add primary member logic
+          updatedAt: Date.now(),
+        });
+      })
+    );
+
+    return {
+      data: { _id: teamId, name: args.team.name, slug: args.team.slug },
+      error: null,
+    };
+  },
+});
+
+export const assignTeamsToProject = mutation({
+  args: {
+    teamsIds: v.array(v.id("teams")),
+    projectId: v.id("projects"),
+    accountToken: v.string(),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<
+    void,
+    | "NOT_AUTHENTICATED"
+    | "NOT_AUTHORIZED"
+    | "TEAM_NOT_FOUND"
+    | "PROJECT_NOT_FOUND"
+  > => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const { data: identity, error: identityError } = await requireRole(ctx, [
+      "CTO",
+      "Product Manager",
+    ]);
     if (identityError) {
       return { data: null, error: identityError };
     }
@@ -353,16 +524,20 @@ export const assignTeamsToProject = mutation({
     if (!project) {
       return { data: null, error: "PROJECT_NOT_FOUND" };
     }
-    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+    if (
+      identity.role === "Product Manager" &&
+      project.productManagerId !== identity.convexUserId
+    ) {
       return { data: null, error: "NOT_AUTHORIZED" };
     }
 
-    await Promise.all(args.teamsIds.map(async (teamId) => {
-      const team = await ctx.db
-        .query("teams")
-        .filter((q) => q.eq(q.field("_id"), teamId))
-        .filter((q) => q.eq(q.field("accountId"), account._id))
-        .unique();
+    await Promise.all(
+      args.teamsIds.map(async (teamId) => {
+        const team = await ctx.db
+          .query("teams")
+          .filter((q) => q.eq(q.field("_id"), teamId))
+          .filter((q) => q.eq(q.field("accountId"), account._id))
+          .unique();
         if (!team) {
           return;
         }
@@ -376,7 +551,7 @@ export const assignTeamsToProject = mutation({
         if (alreadyAssigned) {
           return;
         }
-        
+
         ctx.db.insert("team_projects", {
           team_id: teamId,
           project_id: args.projectId,
@@ -384,10 +559,11 @@ export const assignTeamsToProject = mutation({
           assigned_by: identity.convexUserId,
           updated_at: Date.now(),
         });
-    }));
+      })
+    );
 
     return { data: undefined, error: null };
-  }
+  },
 });
 
 export const unassignTeamsFromProject = mutation({
@@ -396,7 +572,17 @@ export const unassignTeamsFromProject = mutation({
     projectId: v.id("projects"),
     accountToken: v.string(),
   },
-  handler: async (ctx, args): Result<void, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND" | "PROJECT_NOT_FOUND" | "ASSIGNMENT_NOT_FOUND"> => {
+  handler: async (
+    ctx,
+    args
+  ): Result<
+    void,
+    | "NOT_AUTHENTICATED"
+    | "NOT_AUTHORIZED"
+    | "TEAM_NOT_FOUND"
+    | "PROJECT_NOT_FOUND"
+    | "ASSIGNMENT_NOT_FOUND"
+  > => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -407,7 +593,10 @@ export const unassignTeamsFromProject = mutation({
       return { data: null, error: "NOT_AUTHENTICATED" };
     }
 
-    const { data: identity, error: identityError } = await requireRole(ctx, ["CTO", "Product Manager"]);
+    const { data: identity, error: identityError } = await requireRole(ctx, [
+      "CTO",
+      "Product Manager",
+    ]);
     if (identityError) {
       return { data: null, error: identityError };
     }
@@ -420,38 +609,43 @@ export const unassignTeamsFromProject = mutation({
     if (!project) {
       return { data: null, error: "PROJECT_NOT_FOUND" };
     }
-    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+    if (
+      identity.role === "Product Manager" &&
+      project.productManagerId !== identity.convexUserId
+    ) {
       return { data: null, error: "NOT_AUTHORIZED" };
     }
 
-    await Promise.all(args.teamsIds.map(async (teamId) => {
-      const team = await ctx.db
-        .query("teams")
+    await Promise.all(
+      args.teamsIds.map(async (teamId) => {
+        const team = await ctx.db
+          .query("teams")
           .filter((q) => q.eq(q.field("_id"), teamId))
           .filter((q) => q.eq(q.field("accountId"), account._id))
           .unique();
-      if (!team) {
-        return;
-      }
-      
-      const teamProject = await ctx.db
-        .query("team_projects")
-        .filter((q) => q.eq(q.field("team_id"), teamId))
-        .filter((q) => q.eq(q.field("project_id"), args.projectId))
-        .filter((q) => q.eq(q.field("unassigned_at"), undefined))
-        .unique();
-      
-      if (!teamProject) {
-        return;
-      }
+        if (!team) {
+          return;
+        }
 
-      await ctx.db.patch(teamProject._id, {
-        unassigned_at: Date.now(),
-        unassigned_by: identity.convexUserId,
-        updated_at: Date.now(),
-      });
-    }));
+        const teamProject = await ctx.db
+          .query("team_projects")
+          .filter((q) => q.eq(q.field("team_id"), teamId))
+          .filter((q) => q.eq(q.field("project_id"), args.projectId))
+          .filter((q) => q.eq(q.field("unassigned_at"), undefined))
+          .unique();
+
+        if (!teamProject) {
+          return;
+        }
+
+        await ctx.db.patch(teamProject._id, {
+          unassigned_at: Date.now(),
+          unassigned_by: identity.convexUserId,
+          updated_at: Date.now(),
+        });
+      })
+    );
 
     return { data: undefined, error: null };
-  }
+  },
 });

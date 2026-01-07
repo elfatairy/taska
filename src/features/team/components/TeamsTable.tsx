@@ -11,6 +11,8 @@ import { TeamsTableSkeleton } from "@/features/team/components/TeamsTableSkeleto
 import { useRouter } from "next/navigation"
 import { TeamAssignToProjectDialog, TeamAssignToProjectDialogTrigger } from "./TeamAssignToProjectDialog"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { PlusIcon } from "lucide-react"
 
 interface TeamsTableProps {
   columns: ColumnDef<Team>[]
@@ -61,13 +63,21 @@ export function TeamsTable({
           autoFocus
           className="max-w-sm w-full"
         />
-      <TeamAssignToProjectDialog teamsIds={selectedTeamsIds}>
-        <TeamAssignToProjectDialogTrigger>
-          <Button variant="outline" disabled={selectedTeamsIds.length === 0}>
-            Assign to project
+        <div className="flex items-center gap-2">
+          <TeamAssignToProjectDialog teamsIds={selectedTeamsIds}>
+            <TeamAssignToProjectDialogTrigger>
+              <Button variant="outline" disabled={selectedTeamsIds.length === 0}>
+                Assign to project
+              </Button>
+            </TeamAssignToProjectDialogTrigger>
+          </TeamAssignToProjectDialog>
+          
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/manage/teams/new">
+              <PlusIcon className="w-4 h-4" />New Team
+            </Link>
           </Button>
-        </TeamAssignToProjectDialogTrigger>
-      </TeamAssignToProjectDialog>
+        </div>
       </div>
       <Table>
         <TableHeader className="border-t">
