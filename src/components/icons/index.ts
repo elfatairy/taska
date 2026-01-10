@@ -27,5 +27,6 @@ export { default as Shine } from "./Shine";
 export { default as ShoppingBag } from "./ShoppingBag";
 export { default as Star } from "./Star";
 export { default as Support } from "./Support";
+export { default as Swap } from "./Swap";
 export { default as Unknown } from "./Unknown";
 export { default as Web } from "./Web";

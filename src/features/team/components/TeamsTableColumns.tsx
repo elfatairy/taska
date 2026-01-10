@@ -1,26 +1,18 @@
 "use client"
 
-import { Icon } from "@/components/Icon"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/components/ui/copy"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { featureUnderDevelopment } from "@/lib/utils"
-import { Doc } from "@convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
-import { Check, Copy, MoreHorizontal, Users } from "lucide-react"
+import { Check, Copy, MoreHorizontal } from "lucide-react"
 import Link from "next/link"
 import TeamMembersTooltip from "./TeamMembersTooltip"
 import { TeamAssignToProjectDialog, TeamAssignToProjectDialogTrigger } from "./TeamAssignToProjectDialog"
 import TeamProjectsTooltip from "./TeamProjectsTooltip"
 import { Checkbox } from "@/components/ui/checkbox"
-
-export type Team = Doc<"teams"> & {
-  memberIds: Doc<"users">['_id'][],
-  teamLead: Doc<"users"> | null,
-  projectIds: Doc<"projects">['_id'][]
-}
+import type { Team } from "@/features/team/types"
 
 export const teamsTableColumns: ColumnDef<Team>[] = [
   {
@@ -135,9 +127,9 @@ export const teamsTableColumns: ColumnDef<Team>[] = [
                 </DropdownMenuItem>
               </CopyToClipboard>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => featureUnderDevelopment()}
-              >Manage team</DropdownMenuItem>
+              <Link href={`/dashboard/manage/teams/${team.slug}`} className="w-full h-full">
+                <DropdownMenuItem>Manage team</DropdownMenuItem>
+              </Link>
               <TeamAssignToProjectDialogTrigger>
                 <DropdownMenuItem>
                   Assign to project
