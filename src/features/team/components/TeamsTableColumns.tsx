@@ -13,6 +13,7 @@ import { TeamAssignToProjectDialog, TeamAssignToProjectDialogTrigger } from "./T
 import TeamProjectsTooltip from "./TeamProjectsTooltip"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { Team } from "@/features/team/types"
+import { ChangeTeamLeadDialog, ChangeTeamLeadDialogTrigger } from "./ChangeTeamLeadDialog"
 
 export const teamsTableColumns: ColumnDef<Team>[] = [
   {
@@ -100,52 +101,52 @@ export const teamsTableColumns: ColumnDef<Team>[] = [
       // TODO: Refactor to make it more readable
       return (
         <TeamAssignToProjectDialog teamsIds={[team._id]}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="flex justify-end w-full">
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-3xs">
-              <CopyToClipboard textToCopy={team._id} className="w-full h-full">
-                <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-                  <CopyUncopied>
-                    <span className="flex items-center gap-2">
-                      <Copy className="h-2 w-2 text-foreground" />
-                      Copy team ID
-                    </span>
-                  </CopyUncopied>
-                  <CopyCopied>
-                    <div className="flex items-center gap-2">
-                      <Check className="h-2 w-2 text-foreground" />
-                      Copied
-                    </div>
-                  </CopyCopied>
-                </DropdownMenuItem>
-              </CopyToClipboard>
-              <DropdownMenuSeparator />
-              <Link href={`/dashboard/manage/teams/${team.slug}`} className="w-full h-full">
-                <DropdownMenuItem>Manage team</DropdownMenuItem>
-              </Link>
-              <TeamAssignToProjectDialogTrigger>
-                <DropdownMenuItem>
-                  Assign to project
-                </DropdownMenuItem>
-              </TeamAssignToProjectDialogTrigger>
-              <DropdownMenuItem
-                onClick={() => featureUnderDevelopment()}
-              >Change team lead</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => featureUnderDevelopment()}
-              >Archive team</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => featureUnderDevelopment()}
-              >Delete team</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ChangeTeamLeadDialog teamId={team._id} initialTeamLeadId={team.team_lead_id}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex justify-end w-full">
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-3xs">
+                <CopyToClipboard textToCopy={team._id} className="w-full h-full">
+                  <DropdownMenuItem onClick={(e) => e.preventDefault()}>
+                    <CopyUncopied>
+                      <span className="flex items-center gap-2">
+                        <Copy className="h-2 w-2 text-foreground" />
+                        Copy team ID
+                      </span>
+                    </CopyUncopied>
+                    <CopyCopied>
+                      <div className="flex items-center gap-2">
+                        <Check className="h-2 w-2 text-foreground" />
+                        Copied
+                      </div>
+                    </CopyCopied>
+                  </DropdownMenuItem>
+                </CopyToClipboard>
+                <DropdownMenuSeparator />
+                <Link href={`/dashboard/manage/teams/${team.slug}`} className="w-full h-full">
+                  <DropdownMenuItem>Manage team</DropdownMenuItem>
+                </Link>
+                <TeamAssignToProjectDialogTrigger>
+                  <DropdownMenuItem>Assign to project</DropdownMenuItem>
+                </TeamAssignToProjectDialogTrigger>
+                <ChangeTeamLeadDialogTrigger>
+                  <DropdownMenuItem>Change team lead</DropdownMenuItem>
+                </ChangeTeamLeadDialogTrigger>
+                <DropdownMenuItem
+                  onClick={() => featureUnderDevelopment()}
+                >Archive team</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => featureUnderDevelopment()}
+                >Delete team</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ChangeTeamLeadDialog>
         </TeamAssignToProjectDialog>
       )
     },

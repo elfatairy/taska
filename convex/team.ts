@@ -545,6 +545,103 @@ export const updateTeam = mutation({
   },
 });
 
+export const removeTeamMember = mutation({
+  args: {
+    accountToken: v.string(),
+    teamId: v.id("teams"),
+    userId: v.id("users"),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<void, "NOT_AUTHENTICATED"| "NOT_AUTHORIZED"| "TEAM_NOT_FOUND"| "USER_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const team = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("_id"), args.teamId))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!team) {
+      return { data: null, error: "TEAM_NOT_FOUND" };
+    }
+    const teamMember = await ctx.db
+      .query("team_members")
+      .filter((q) => q.eq(q.field("teamId"), args.teamId))
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .unique();
+    if (!teamMember) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
+    await ctx.db.delete(teamMember._id);
+    return { data: undefined, error: null };
+  },
+});
+
+export const changeTeamLead = mutation({
+  args: {
+    accountToken: v.string(),
+    teamId: v.id("teams"),
+    teamLeadId: v.optional(v.id("users")),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<void, "NOT_AUTHENTICATED"| "NOT_AUTHORIZED"| "TEAM_NOT_FOUND"| "USER_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+    const team = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("_id"), args.teamId))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!team) {
+      return { data: null, error: "TEAM_NOT_FOUND" };
+    }
+    if (args.teamLeadId) {
+      const existingTeamLead = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), args.teamLeadId))
+        .filter((q) => q.eq(q.field("accountId"), account._id))
+        .unique();
+      if (!existingTeamLead) {
+        return { data: null, error: "USER_NOT_FOUND" };
+      }
+    }
+
+    await ctx.db.patch(team._id, {
+      team_lead_id: args.teamLeadId,
+      updatedAt: Date.now(),
+    });
+
+    return { data: undefined, error: null };
+  },
+});
+
 export const assignTeamsToProject = mutation({
   args: {
     teamsIds: v.array(v.id("teams")),
@@ -638,14 +735,7 @@ export const unassignTeamsFromProject = mutation({
   handler: async (
     ctx,
     args
-  ): Result<
-    void,
-    | "NOT_AUTHENTICATED"
-    | "NOT_AUTHORIZED"
-    | "TEAM_NOT_FOUND"
-    | "PROJECT_NOT_FOUND"
-    | "ASSIGNMENT_NOT_FOUND"
-  > => {
+  ): Result<void, "NOT_AUTHENTICATED"| "NOT_AUTHORIZED"| "TEAM_NOT_FOUND"| "PROJECT_NOT_FOUND"| "ASSIGNMENT_NOT_FOUND"> => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {

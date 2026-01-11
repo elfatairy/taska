@@ -1,4 +1,4 @@
-import { useAccountQuery } from "@/features/account/useAccount";
+import { useAccountMutation, useAccountQuery } from "@/features/account/useAccount";
 import { api } from "@convex/_generated/api";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,10 @@ import { featureUnderDevelopment } from "@/lib/utils";
 import { getProjectIcon } from "@/features/project/utils/getProjectIcon";
 import { Icon } from "@/components/Icon";
 import { TeamDetailsLoading, TeamDetailsMembersCardLoading, TeamDetailsProjectsCardLoading } from "./TeamDetailsLoading";
+import { TeamAssignToProjectDialog, TeamAssignToProjectDialogTrigger } from "./TeamAssignToProjectDialog";
+import { useWithLoading } from "@/hooks/useWithLoading";
+import { toast } from "sonner";
+import { ChangeTeamLeadDialog, ChangeTeamLeadDialogTrigger } from "./ChangeTeamLeadDialog";
 
 export function TeamDetails({ teamSlug }: { teamSlug: string }) {
   const teamQuery = useAccountQuery(api.team.getTeamBySlug, {
@@ -37,7 +41,7 @@ export function TeamDetails({ teamSlug }: { teamSlug: string }) {
       </div>
 
       <div className="flex flex-3 flex-col gap-4">
-        <TeamDetailsAboutCard description={team.description} teamLead={team.teamLead} />
+        <TeamDetailsAboutCard description={team.description} teamLead={team.teamLead} teamId={team._id} />
         <TeamDetailsStatsCard team={team} />
       </div>
     </div>
@@ -86,6 +90,33 @@ function TeamDetailsMembersCard({ teamId }: { teamId: Team['_id'] }) {
 }
 
 function TeamDetailsMemberItem({ member }: { member: TeamMember }) {
+  const unassignFromTeamMutation = useAccountMutation(api.team.removeTeamMember);
+  const changeTeamLeadMutation = useAccountMutation(api.team.changeTeamLead);
+  const { isLoading: isUnassigningLoading, runWithLoading: runWithUnassigningLoading } = useWithLoading();
+  const { isLoading: isUpdatingLoading, runWithLoading: runWithUpdatingLoading } = useWithLoading();
+
+  const handleUnassign = () => {
+    runWithUnassigningLoading(async () => {
+      await unassignFromTeamMutation({
+        teamId: member.teamId,
+        userId: member.userId
+      });
+    });
+  };
+
+  const ChangeTeamLead = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    runWithUpdatingLoading(async () => {
+      await changeTeamLeadMutation({
+        teamId: member.teamId,
+        teamLeadId: member.userId
+      });
+
+      toast.success("Team lead changed successfully"); // TODO: Change this to button success state
+    });
+  };
+
   return (
     <div key={member._id} className="flex items-center justify-between gap-2 p-2 hover:bg-slate-100 rounded-md transition-colors">
       <div className="flex items-center gap-2">
@@ -129,8 +160,11 @@ function TeamDetailsMemberItem({ member }: { member: TeamMember }) {
           <Link href={`/dashboard/manage/users/${member.user.profile_slug}`} className="w-full h-full">
             <DropdownMenuItem>View user</DropdownMenuItem>
           </Link>
-          <DropdownMenuItem onClick={() => featureUnderDevelopment()}>
-            Promote to team lead
+          <DropdownMenuItem onClick={handleUnassign}>
+            {isUnassigningLoading ? "Removing..." : "Remove from team"}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={ChangeTeamLead}>
+            {isUpdatingLoading ? "Promoting..." : "Promote to team lead"}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => featureUnderDevelopment()}>
             Remove from team
@@ -162,19 +196,21 @@ function TeamDetailsProjectsCard({ teamId }: { teamId: Team['_id'] }) {
         <CardTitle>Team Projects</CardTitle>
         <CardDescription>All projects assigned to this team</CardDescription>
         <CardAction>
-          <Button
-            variant="ghost" size="sm" className="text-xs border border-slate-300"
-            onClick={() => featureUnderDevelopment()}
-          >
-            <PlusIcon className="w-3 h-3 mr-1" />
-            Assign Project
-          </Button>
+
+          <TeamAssignToProjectDialog teamsIds={[teamId]}>
+            <TeamAssignToProjectDialogTrigger>
+              <Button variant="ghost" size="sm" className="text-xs border border-slate-300">
+                <PlusIcon className="w-3 h-3 mr-1" />
+                Assign Project
+              </Button>
+            </TeamAssignToProjectDialogTrigger>
+          </TeamAssignToProjectDialog>
         </CardAction>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col">
-          {teamProjects.map((project) => (
-            <TeamDetailsProjectItem key={project._id} project={project} />
+          {teamProjects.map((teamProject) => (
+            <TeamDetailsProjectItem key={teamProject._id} teamProject={teamProject} teamId={teamId} />
           ))}
         </div>
       </CardContent>
@@ -182,14 +218,26 @@ function TeamDetailsProjectsCard({ teamId }: { teamId: Team['_id'] }) {
   )
 }
 
-function TeamDetailsProjectItem({ project }: { project: TeamProject }) {
+function TeamDetailsProjectItem({ teamProject, teamId }: { teamProject: TeamProject, teamId: Team['_id'] }) {
+  const unassignFromProjectMutation = useAccountMutation(api.team.unassignTeamsFromProject);
+  const { isLoading: isUnassigningLoading, runWithLoading: runWithUnassigningLoading } = useWithLoading();
+
+  const handleUnassign = () => {
+    runWithUnassigningLoading(async () => {
+      await unassignFromProjectMutation({
+        teamsIds: [teamId],
+        projectId: teamProject.project_id
+      });
+    });
+  };
+
   return (
     <div className="flex items-center justify-between gap-2 p-2 hover:bg-slate-100 rounded-md transition-colors">
       <div className="flex items-center gap-2">
-        <Icon icon={getProjectIcon(project.project.type)} size={20} />
+        <Icon icon={getProjectIcon(teamProject.project.type)} size={20} />
         <div className="flex flex-col">
-          <p className="text-base font-medium">{project.project.name}</p>
-          <p className="text-sm text-muted-foreground line-clamp-1">{project.project.description}</p>
+          <p className="text-base font-medium">{teamProject.project.name}</p>
+          <p className="text-sm text-muted-foreground line-clamp-1">{teamProject.project.description}</p>
         </div>
       </div>
 
@@ -203,7 +251,7 @@ function TeamDetailsProjectItem({ project }: { project: TeamProject }) {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-3xs">
-          <CopyToClipboard textToCopy={project._id} className="w-full h-full">
+          <CopyToClipboard textToCopy={teamProject.project_id} className="w-full h-full">
             <DropdownMenuItem onClick={(e) => e.preventDefault()}>
               <CopyUncopied>
                 <span className="flex items-center gap-2">
@@ -220,11 +268,11 @@ function TeamDetailsProjectItem({ project }: { project: TeamProject }) {
             </DropdownMenuItem>
           </CopyToClipboard>
           <DropdownMenuSeparator />
-          <Link href={`/dashboard/projects/${project.project.slug}`} className="w-full h-full">
+          <Link href={`/dashboard/projects/${teamProject.project.slug}`} className="w-full h-full">
             <DropdownMenuItem>View project</DropdownMenuItem>
           </Link>
-          <DropdownMenuItem onClick={() => featureUnderDevelopment()}>
-            Unassign from team
+          <DropdownMenuItem onClick={handleUnassign}>
+            {isUnassigningLoading ? "Unassigning..." : "Unassign from team"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -232,7 +280,15 @@ function TeamDetailsProjectItem({ project }: { project: TeamProject }) {
   )
 }
 
-function TeamDetailsAboutCard({ description, teamLead }: { description: string, teamLead: TeamLead | null }) {
+function TeamDetailsAboutCard({ description, teamLead, teamId }: { description: string, teamLead: TeamLead | null, teamId: Team['_id'] }) {
+  const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
+    teamId: teamId,
+  });
+
+  if (teamMembersQuery?.error) {
+    return <div>Error: {teamMembersQuery.error}</div> // TODO: Show a proper error ui  
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -260,21 +316,30 @@ function TeamDetailsAboutCard({ description, teamLead }: { description: string, 
             {!teamLead && (
               <p className="text-sm text-muted-foreground mb-2">No team lead assigned</p>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => featureUnderDevelopment()}
-            >
-              {
-                teamLead ? (
-                  <Icon icon="Swap" size={16} className="w-3 h-3 mr-1" />
-                ) : (
-                  <PlusIcon className="w-3 h-3 mr-1" />
-                )
-              }
-              { teamLead ? "Change Team Lead" : "Assign Team Lead" }
-            </Button>
+            <ChangeTeamLeadDialog teamId={teamId} initialTeamLeadId={teamLead?._id}>
+              <ChangeTeamLeadDialogTrigger>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  disabled={!teamMembersQuery}
+                >
+                  {
+                    teamLead ? (
+                      <>
+                        <Icon icon="Swap" size={16} className="w-3 h-3 mr-1" />
+                        Change Team Lead
+                      </>
+                    ) : (
+                      <>
+                        <PlusIcon className="w-3 h-3 mr-1" />
+                        Assign Team Lead
+                      </>
+                    )
+                  }
+                </Button>
+              </ChangeTeamLeadDialogTrigger>
+            </ChangeTeamLeadDialog>
           </div>
 
           <div>
