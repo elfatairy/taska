@@ -1,9 +1,8 @@
 import { useAccountQuery } from "@/features/account/useAccount";
 import { api } from "@convex/_generated/api";
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Check, Copy, EditIcon, MoreHorizontal, PlusIcon } from "lucide-react";
+import { Check, Copy, MoreHorizontal, PlusIcon } from "lucide-react";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -31,47 +30,17 @@ export function TeamDetails({ teamSlug }: { teamSlug: string }) {
   const team = teamQuery.data;
 
   return (
-    <div className="flex flex-col gap-2 p-6">
-      <div className="flex justify-between items-center">
-        <TeamDetailsBreadcrumb teamName={team.name} />
-        <div className="flex gap-2">
-          <Button variant="ghost" className="border border-slate-300">
-            <EditIcon className="w-4 h-4" />
-            Edit Team Details
-          </Button>
-        </div>
+    <div className="flex gap-4">
+      <div className="flex flex-7 flex-col gap-4">
+        <TeamDetailsMembersCard teamId={team._id} />
+        <TeamDetailsProjectsCard teamId={team._id} />
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex flex-7 flex-col gap-4">
-          <TeamDetailsMembersCard teamId={team._id} />
-          <TeamDetailsProjectsCard teamId={team._id} />
-        </div>
-
-        <div className="flex flex-3 flex-col gap-4">
-          <TeamDetailsAboutCard description={team.description} teamLead={team.teamLead} />
-          <TeamDetailsStatsCard team={team} />
-        </div>
+      <div className="flex flex-3 flex-col gap-4">
+        <TeamDetailsAboutCard description={team.description} teamLead={team.teamLead} />
+        <TeamDetailsStatsCard team={team} />
       </div>
     </div>
-  )
-}
-
-function TeamDetailsBreadcrumb({ teamName }: { teamName: string }) {
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href="/dashboard/manage/teams">Teams</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>{teamName}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
   )
 }
 
@@ -297,8 +266,14 @@ function TeamDetailsAboutCard({ description, teamLead }: { description: string, 
               className="w-full text-xs"
               onClick={() => featureUnderDevelopment()}
             >
-              <Icon icon="Swap" size={16} className="w-3 h-3 mr-1" />
-              Change Team Lead
+              {
+                teamLead ? (
+                  <Icon icon="Swap" size={16} className="w-3 h-3 mr-1" />
+                ) : (
+                  <PlusIcon className="w-3 h-3 mr-1" />
+                )
+              }
+              { teamLead ? "Change Team Lead" : "Assign Team Lead" }
             </Button>
           </div>
 

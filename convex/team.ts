@@ -100,10 +100,7 @@ export const getTeamBySlug = query({
   handler: async (
     ctx,
     args
-  ): Result<
-    PopulatedTeam,
-    "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"
-  > => {
+  ): Result<PopulatedTeam, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND"> => {
     const { data: account } = await ctx.runQuery(
       internal.account.getAccountByToken,
       {
@@ -122,7 +119,10 @@ export const getTeamBySlug = query({
 
     const team = await ctx.db
       .query("teams")
-      .filter((q) => q.eq(q.field("slug"), args.teamSlug))
+      .filter((q) => q.or(
+        q.eq(q.field("slug"), args.teamSlug),
+        q.eq(q.field("previous_slug"), args.teamSlug)
+      ))
       .filter((q) => q.eq(q.field("accountId"), account._id))
       .unique();
 
@@ -479,6 +479,69 @@ export const createTeam = mutation({
       data: { _id: teamId, name: args.team.name, slug: args.team.slug },
       error: null,
     };
+  },
+});
+
+export const updateTeam = mutation({
+  args: {
+    accountToken: v.string(),
+    teamId: v.id("teams"),
+    team: v.object({
+      name: v.string(),
+      description: v.string(),
+      slug: v.string(),
+      teamLeadId: v.optional(v.id("users")),
+    }),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<void, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "TEAM_NOT_FOUND" | "TEAM_LEAD_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const identityError = (await requireRole(ctx, ["CTO"])).error;
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const team = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("_id"), args.teamId))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!team) {
+      return { data: null, error: "TEAM_NOT_FOUND" };
+    }
+
+    if (args.team.teamLeadId) {
+      const existingTeamLead = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("_id"), args.team.teamLeadId))
+        .filter((q) => q.eq(q.field("accountId"), account._id))
+        .unique();
+      if (!existingTeamLead) {
+        return { data: null, error: "TEAM_LEAD_NOT_FOUND" };
+      }
+    }
+
+    await ctx.db.patch(team._id, {
+      name: args.team.name,
+      description: args.team.description,
+      slug: args.team.slug,
+      previous_slug: team.slug !== args.team.slug ? team.slug : team.previous_slug,
+      team_lead_id: args.team.teamLeadId,
+      updatedAt: Date.now(),
+    });
+
+    return { data: undefined, error: null };
   },
 });
 

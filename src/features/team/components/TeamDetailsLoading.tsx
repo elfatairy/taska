@@ -2,27 +2,34 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { EditIcon } from "lucide-react";
 
 export function TeamDetailsLoading() {
   return (
-    <div className="flex flex-col gap-2 p-6">
-      <div className="flex justify-between items-center">
-        <TeamDetailsBreadcrumbLoading />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-40" />
-        </div>
+    <div className="flex gap-4">
+      <div className="flex flex-7 flex-col gap-4">
+        <TeamDetailsMembersCardLoading />
+        <TeamDetailsProjectsCardLoading />
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex flex-7 flex-col gap-4">
-          <TeamDetailsMembersCardLoading />
-          <TeamDetailsProjectsCardLoading />
-        </div>
+      <div className="flex flex-3 flex-col gap-4">
+        <TeamDetailsAboutCardLoading />
+        <TeamDetailsStatsCardLoading />
+      </div>
+    </div>
+  );
+}
 
-        <div className="flex flex-3 flex-col gap-4">
-          <TeamDetailsAboutCardLoading />
-          <TeamDetailsStatsCardLoading />
-        </div>
+export function TeamDetailsHeaderLoading() {
+  return (
+    <div className="flex justify-between items-center">
+      <TeamDetailsBreadcrumbLoading />
+      <div className="flex gap-2">
+        <Button variant="ghost" className="border border-slate-300" disabled>
+          <EditIcon className="w-4 h-4" />
+          Edit Team Details
+        </Button>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFiltered
 import { useState } from "react"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { Team } from "@/features/team/components/TeamsTableColumns"
+import { Team } from "@/features/team/types"
 import { TeamsTableSkeleton } from "@/features/team/components/TeamsTableSkeleton"
 import { useRouter } from "next/navigation"
 import { TeamAssignToProjectDialog, TeamAssignToProjectDialogTrigger } from "./TeamAssignToProjectDialog"

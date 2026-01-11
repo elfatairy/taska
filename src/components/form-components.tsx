@@ -19,9 +19,9 @@ import { PencilIcon } from 'lucide-react';
 export function SubscribeButton({ label, loadingLabel, icon, className }: { label: string, loadingLabel?: string, icon?: React.ReactNode, className?: string }) {
   const form = useFormContext()
   return (
-    <form.Subscribe selector={(state) => state.isSubmitting}>
-      {(isSubmitting) => (
-        <Button type="submit" disabled={isSubmitting} className={cn("relative font-bold", className)}>
+    <form.Subscribe selector={(state) => ({ isSubmitting: state.isSubmitting, isDirty: state.isDirty })}>
+      {({ isSubmitting, isDirty }) => (
+        <Button type="submit" disabled={isSubmitting || !isDirty} className={cn("relative font-bold", className)}>
           {isSubmitting ? loadingLabel || label : label}
           {icon}
         </Button>
@@ -177,7 +177,19 @@ export function TextArea({
   )
 }
 
-export function Combobox({ label, options, placeholder, emptyMessage, loading }: ComboboxProps & { label?: string }) {
+export function Combobox({ 
+  label, 
+  options, 
+  placeholder, 
+  emptyMessage, 
+  loading 
+}: { 
+  label?: string, 
+  options: ComboboxProps['options'], 
+  placeholder?: string, 
+  emptyMessage?: string, 
+  loading?: boolean 
+}) {
   const field = useFieldContext<string>()
   const errors = useStore(field.store, (state) => state.meta.errors)
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
@@ -191,6 +203,7 @@ export function Combobox({ label, options, placeholder, emptyMessage, loading }:
         id={field.name}
         name={field.name}
         options={options}
+        value={field.state.value}
         onValueChange={(value) => field.handleChange(value)}
         placeholder={placeholder}
         loading={loading}
@@ -224,7 +237,7 @@ export function DatePicker({ label, disabled, placeholder }: { label?: string, d
   const errors = useStore(field.store, (state) => state.meta.errors)
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
 
-  return ( 
+  return (
     <Field className="w-full" data-invalid={isInvalid}>
       {label && (
         <FieldLabel htmlFor={field.name} className="text-xs text-muted-foreground">

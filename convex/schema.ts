@@ -51,6 +51,7 @@ export default defineSchema({
   teams: defineTable({
     name: v.string(),
     description: v.string(),
+    previous_slug: v.optional(v.string()),
     slug: v.string(),
     team_lead_id: v.optional(v.id("users")),
     accountId: v.id("accounts"),

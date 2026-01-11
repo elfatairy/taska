@@ -32,11 +32,12 @@ export interface ComboboxProps {
   id?: string;
   name?: string;
   onValueChange?: (value: string) => void;
+  value: string;
 }
 
-export function Combobox({ options, placeholder, loading, emptyMessage, id, name, onValueChange }: ComboboxProps) {
+export function Combobox({ options, placeholder, loading, emptyMessage, id, name, onValueChange, value: initialValue }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
+  const [value, setValue] = React.useState(initialValue)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
