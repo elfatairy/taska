@@ -46,17 +46,13 @@ export function SidebarPM() {
               icon: getProjectIcon(project.type),
               children: [
                 {
-                  label: "Discussions",
-                  href: `/dashboard/projects/${project.slug}/discussions`,
+                  label: "Tasks Backlog",
+                  href: `/dashboard/projects/${project.slug}/backlog`,
                 },
                 {
                   label: "Sprints",
                   href: `/dashboard/projects/${project.slug}/sprints`,
-                },
-                {
-                  label: "Teams",
-                  href: `/dashboard/projects/${project.slug}/teams`,
-                },
+                }
               ],
             })),
           ]

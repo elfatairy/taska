@@ -26,3 +26,26 @@ export const PROJECT_TYPES = [
   "game",
   "other",
 ] as const;
+
+export const SPRINT_STATUS = [
+  "PLANNED",
+  "READY",
+  "ACTIVE",
+  "COMPLETED",
+  "CANCELED",
+] as const;
+
+export const TASK_STATUS = [
+  "BACKLOG",
+  "TODO",
+  "IN_PROGRESS",
+  "IN_REVIEW",
+  "BLOCKED",
+  "DONE",
+] as const;
+
+export const TASK_PRIORITY = [
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+] as const;

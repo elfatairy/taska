@@ -17,6 +17,40 @@ export const getProjectsByAccountId = internalQuery({
   }
 })
 
+export const getProjectBySlug = query({
+  args: {
+    accountToken: v.string(),
+    projectSlug: v.string(),
+  },
+  handler: async (ctx, args): Result<Doc<"projects">, "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "PROJECT_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, { accountToken: args.accountToken });
+  
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const { data: identity, error: identityError } = await requireRole(ctx, ["CTO", "Product Manager"]);
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+    
+    const project = await ctx.db
+      .query("projects")
+      .filter((q) => q.eq(q.field("slug"), args.projectSlug))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!project) {
+      return { data: null, error: "PROJECT_NOT_FOUND" };
+    }
+
+    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+      return { data: null, error: "NOT_AUTHORIZED" };
+    }
+
+    return { data: project, error: null };
+  },
+});
+
 export const createProjectService = internalMutation({
   args: {
     accountId: v.id("accounts"),
@@ -175,6 +209,106 @@ export const deleteProject = internalMutation({
     return { data: undefined, error: null };
   }
 })
+
+export const getProjectTeams = query({
+  args: {
+    accountToken: v.string(),
+    projectId: v.id("projects"),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<Doc<"teams">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "PROJECT_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const { data: identity, error: identityError } = await requireRole(ctx, ["CTO", "Product Manager"]);
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const project = await ctx.db
+    .query("projects")
+    .filter((q) => q.eq(q.field("_id"), args.projectId))
+    .filter((q) => q.eq(q.field("accountId"), account._id))
+    .unique();
+    if (!project) {
+      return { data: null, error: "PROJECT_NOT_FOUND" };
+    }
+
+    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+      return { data: null, error: "NOT_AUTHORIZED" };
+    }
+
+    const teamProjects = await ctx.db
+      .query("team_projects")
+      .filter((q) => q.eq(q.field("project_id"), args.projectId))
+      .filter((q) => q.eq(q.field("unassigned_at"), undefined))
+      .collect();
+
+    const teams = await Promise.all(
+      teamProjects.map(async (tp) => {
+        const team = await ctx.db.get(tp.team_id);
+        return team;
+      })
+    );
+
+    return { data: teams.filter((t) => t !== null), error: null };
+  },
+});
+
+export const getProjectSprints = query({
+  args: {
+    accountToken: v.string(),
+    projectId: v.id("projects"),
+  },
+  handler: async (
+    ctx,
+    args
+  ): Result<Doc<"sprints">[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "PROJECT_NOT_FOUND"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const { data: identity, error: identityError } = await requireRole(ctx, ["CTO", "Product Manager"]);
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    const project = await ctx.db
+      .query("projects")
+      .filter((q) => q.eq(q.field("_id"), args.projectId))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!project) {
+      return { data: null, error: "PROJECT_NOT_FOUND" };
+    }
+
+    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+      return { data: null, error: "NOT_AUTHORIZED" };
+    }
+    
+    const sprints = await ctx.db
+      .query("sprints")
+      .filter((q) => q.eq(q.field("project_id"), args.projectId))
+      .collect();
+
+    return { data: sprints, error: null };
+  },
+});
 
 export const initializeProjects = async (
   ctx: ActionCtx,

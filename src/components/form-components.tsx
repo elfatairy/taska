@@ -81,6 +81,7 @@ export function TextField({
         placeholder={placeholder}
         onBlur={field.handleBlur}
         autoComplete={autoComplete}
+        type={type}
         onChange={(e) => {
           field.handleChange(e.target.value);
           onChange?.(e);
