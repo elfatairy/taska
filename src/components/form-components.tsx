@@ -56,6 +56,8 @@ export function TextField({
   autoComplete,
   type,
   onChange,
+  min,
+  max,
 }: {
   label?: string
   placeholder?: string
@@ -63,6 +65,8 @@ export function TextField({
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   autoComplete?: React.ComponentProps<'input'>['autoComplete']
   type?: React.ComponentProps<'input'>['type']
+  min?: number
+  max?: number
 }) {
   const field = useFieldContext<string>()
   const errors = useStore(field.store, (state) => state.meta.errors)
@@ -82,6 +86,8 @@ export function TextField({
         onBlur={field.handleBlur}
         autoComplete={autoComplete}
         type={type}
+        min={min}
+        max={max}
         onChange={(e) => {
           field.handleChange(e.target.value);
           onChange?.(e);
