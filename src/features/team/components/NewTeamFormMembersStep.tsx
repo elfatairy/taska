@@ -40,7 +40,7 @@ export function NewTeamFormMembersStep({ form, previousStep }: {
       <div className="flex flex-col gap-2 my-4">
         <Input
           type="text"
-          placeholder="Search for a project"
+          placeholder="Search for a user"
           onChange={(e) => setSearchValue(e.target.value)}
           icon={Search}
           iconProps={{ behavior: 'prepend' }}

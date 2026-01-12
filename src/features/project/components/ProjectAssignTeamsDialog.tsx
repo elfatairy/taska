@@ -8,22 +8,59 @@ import { Badge } from "@/components/ui/badge"
 import { useAccountMutation, useAccountQuery } from "@/features/account/useAccount"
 import { api } from "@convex/_generated/api"
 import { Minus, Plus } from "lucide-react"
-import { useState } from "react"
-import { Doc, Id } from "@convex/_generated/dataModel"
+import { useEffect, useEffectEvent, useState } from "react"
 import { useWithLoading } from "@/hooks/useWithLoading"
 import { Spinner } from "@/components/ui/spinner"
 import { TeamAssignToProjectDialogSkeleton } from "./ProjectAssignTeamsDialogSkeleton"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import type { ProjectId, Team } from "@/features/project/types"
 
-type Team = Doc<"teams"> & {
-  memberIds: Doc<"users">["_id"][];
-  teamLead: Doc<"users"> | null;
-  projectIds: Doc<"projects">["_id"][];
+export function useShouldOpenProjectAssignTeamsDialog(projectId?: ProjectId) {
+  const searchParams = useSearchParams();
+  return searchParams.get("modal") === "project-assign-teams" && (!projectId || searchParams.get("projectId") === projectId);
 }
-type ProjectId = Id<"projects">
 
-export function ProjectAssignTeamsDialog({ children, projectId }: { children: React.ReactNode, projectId: ProjectId }) {
+export function ProjectAssignTeamsDialog({
+  children,
+  projectId,
+  open,
+  onClose,
+}: {
+  children?: React.ReactNode,
+  projectId: ProjectId,
+  open: boolean,
+  onClose: () => void,
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleUrlParams = (isOpen: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isOpen) {
+      params.set("modal", "project-assign-teams");
+      params.set("projectId", projectId);
+    } else {
+      params.delete("modal");
+      params.delete("projectId");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
+    }
+    handleUrlParams(isOpen);
+  }
+
+  const handleUrlParamsEffect = useEffectEvent(handleUrlParams);
+  useEffect(() => {
+    if (open) handleUrlParamsEffect(true);
+  }, [open]);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {children}
       <DialogContent className="md:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogTitle className="sr-only">Assign teams to project</DialogTitle>
@@ -160,7 +197,7 @@ function ProjectAssignTeamsDialogItem({ team, projectId, isAssigned }: { team: T
             Assign
           </Button>
         )}
-        
+
         {isAssigned && (
           <Button
             size="sm"

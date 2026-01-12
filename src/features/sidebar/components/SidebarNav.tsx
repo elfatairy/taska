@@ -5,18 +5,19 @@ import { SidebarNavSkeleton } from "./SidebarSkeleton";
 import { SidebarPM } from "./SidebarPM";
 import { SidebarCTO } from "./SidebarCTO";
 import { SidebarUser } from "./SidebarUser";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function SidebarNav() {
-  const { user, isLoaded } = useUser();
-  const role = user?.publicMetadata.role as string;
+  const userRole = useUserRole();
+  const { isLoaded } = useUser();
 
   if (!isLoaded) {
     return <SidebarNavSkeleton />;
   }
 
-  if (role === "CTO") {
+  if (userRole === "CTO") {
     return <SidebarCTO />;
-  } else if (role === "Product Manager") {
+  } else if (userRole === "Product Manager") {
     return <SidebarPM />;
   } else {
     return <SidebarUser />;

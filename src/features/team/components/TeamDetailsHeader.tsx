@@ -3,12 +3,27 @@ import Link from "next/link";
 import { useAccountQuery } from "@/features/account/useAccount";
 import { api } from "@convex/_generated/api";
 import { TeamDetailsHeaderLoading } from "./TeamDetailsLoading";
-import { EditTeamDetailsDialog } from "./EditTeamDetailsDialog";
+import { EditTeamDetailsDialog, useShouldOpenEditTeamDetailsDialog } from "./EditTeamDetailsDialog";
+import { useUserRole } from "@/hooks/useUserRole";
+import { EditIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function TeamDetailsHeader({ teamSlug }: { teamSlug: string }) {
   const teamQuery = useAccountQuery(api.team.getTeamBySlug, {
     teamSlug,
   });
+  const userRole = useUserRole();
+  const shouldOpenEditTeamDetailsDialog = useShouldOpenEditTeamDetailsDialog(teamSlug);
+  const [openEditTeamDetailsDialog, setOpenEditTeamDetailsDialog] = useState(shouldOpenEditTeamDetailsDialog);
+
+  function handleOpenEditTeamDetailsDialog() {
+    setOpenEditTeamDetailsDialog(true);
+  }
+
+  function handleCloseEditTeamDetailsDialog() {
+    setOpenEditTeamDetailsDialog(false);
+  }
 
   if (!teamQuery) {
     return <TeamDetailsHeaderLoading />;
@@ -21,12 +36,29 @@ export function TeamDetailsHeader({ teamSlug }: { teamSlug: string }) {
   const team = teamQuery.data;
 
   return (
-    <div className="flex justify-between items-center">
-      <TeamDetailsBreadcrumb teamName={team.name} />
-      <div className="flex gap-2">
-        <EditTeamDetailsDialog team={team} />
+    <>
+      <EditTeamDetailsDialog
+        team={team}
+        open={openEditTeamDetailsDialog}
+        onClose={handleCloseEditTeamDetailsDialog}
+      />
+      <div className="flex justify-between items-center">
+        <TeamDetailsBreadcrumb teamName={team.name} />
+        {
+          userRole === "CTO" && (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost" className="border border-slate-300"
+                onClick={handleOpenEditTeamDetailsDialog}
+              >
+                <EditIcon className="w-4 h-4" />
+                Edit Team Details
+              </Button>
+            </div>
+          )
+        }
       </div>
-    </div>
+    </>
   )
 }
 

@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { formatDuration } from "../utils/formatDuration"
 import { ProjectsTableActions } from "./ProjectsTableActions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ProjectId } from "../types"
 
 export type Project = Doc<"projects"> & { productManager: Doc<"users"> | null }
 
@@ -126,6 +127,15 @@ export const projectsTableColumns: ColumnDef<Project>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => <ProjectsTableActions project={row.original} />,
+    cell: ({ row, table }) => {
+      const project = row.original
+      const meta = table.options.meta as {
+        handleOpenProjectAssignTeamsDialog: (projectId: ProjectId) => void;
+      }
+      return <ProjectsTableActions
+        project={project}
+        handleOpenProjectAssignTeamsDialog={() => meta.handleOpenProjectAssignTeamsDialog(project._id)}
+      />
+    }
   },
 ]

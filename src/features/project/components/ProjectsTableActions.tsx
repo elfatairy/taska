@@ -10,64 +10,66 @@ import { Check } from "lucide-react"
 import { featureUnderDevelopment } from "@/lib/utils"
 import { Project } from "./ProjectsTableColumns"
 import { useUser } from "@clerk/nextjs"
+import { useUserRole } from "@/hooks/useUserRole"
 import { useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProjectAssignTeamsDialog, ProjectAssignTeamsDialogTrigger } from "./ProjectAssignTeamsDialog"
+import { ProjectId } from "../types"
 
-export function ProjectsTableActions({ project }: { project: Project }) {
-  const { user, isLoaded } = useUser()
+export function ProjectsTableActions({ project, handleOpenProjectAssignTeamsDialog }: { project: Project, handleOpenProjectAssignTeamsDialog: () => void }) {
+  const userRole = useUserRole();
+  const { isLoaded } = useUser();
 
   return (
-    <ProjectAssignTeamsDialog projectId={project._id}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-3xs">
-          <CopyToClipboard textToCopy={project._id} className="w-full h-full">
-            <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-              <CopyUncopied>
-                <span className="flex items-center gap-2">
-                  <Copy className="h-2 w-2 text-foreground" />
-                  Copy project ID
-                </span>
-              </CopyUncopied>
-              <CopyCopied>
-                <div className="flex items-center gap-2">
-                  <Check className="h-2 w-2 text-foreground" />
-                  Copied
-                </div>
-              </CopyCopied>
-            </DropdownMenuItem>
-          </CopyToClipboard>
-          <DropdownMenuSeparator />
-          {!isLoaded && Array.from({ length: 3 }).map((_, index) => (
-            <DropdownMenuItem key={index}>
-              <Skeleton className="h-4 w-full" />
-            </DropdownMenuItem>
-          ))}
-          {isLoaded && user?.publicMetadata.role === "CTO" && <CTOActions />}
-          {isLoaded && user?.publicMetadata.role === "Product Manager" && <ProductManagerActions project={project} />}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </ProjectAssignTeamsDialog>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-3xs">
+        <CopyToClipboard textToCopy={project._id} className="w-full h-full">
+          <DropdownMenuItem onClick={(e) => e.preventDefault()}>
+            <CopyUncopied>
+              <span className="flex items-center gap-2">
+                <Copy className="h-2 w-2 text-foreground" />
+                Copy project ID
+              </span>
+            </CopyUncopied>
+            <CopyCopied>
+              <div className="flex items-center gap-2">
+                <Check className="h-2 w-2 text-foreground" />
+                Copied
+              </div>
+            </CopyCopied>
+          </DropdownMenuItem>
+        </CopyToClipboard>
+        <DropdownMenuSeparator />
+        {!isLoaded && Array.from({ length: 3 }).map((_, index) => (
+          <DropdownMenuItem key={index}>
+            <Skeleton className="h-4 w-full" />
+          </DropdownMenuItem>
+        ))}
+        {isLoaded && userRole === "CTO" && (
+          <CTOActions
+            handleOpenProjectAssignTeamsDialog={handleOpenProjectAssignTeamsDialog}
+          />
+        )}
+        {isLoaded && userRole === "Product Manager" && <ProductManagerActions project={project} />}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
-function CTOActions() {
+function CTOActions({ handleOpenProjectAssignTeamsDialog }: { handleOpenProjectAssignTeamsDialog: () => void }) {
   return (
     <>
       <DropdownMenuItem onClick={() => featureUnderDevelopment()}>
         Edit project
       </DropdownMenuItem>
-      <ProjectAssignTeamsDialogTrigger>
-        <DropdownMenuItem>
-          Assign teams
-        </DropdownMenuItem>
-      </ProjectAssignTeamsDialogTrigger>
+      <DropdownMenuItem onClick={handleOpenProjectAssignTeamsDialog}>
+        Assign teams
+      </DropdownMenuItem>
       <DropdownMenuItem onClick={() => featureUnderDevelopment()}>
         Archive project
       </DropdownMenuItem>

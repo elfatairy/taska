@@ -6,42 +6,53 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useWithLoading } from "@/hooks/useWithLoading";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function ChangeTeamLeadDialog({ children, teamId, initialTeamLeadId }: { children: React.ReactNode, teamId: Team['_id'], initialTeamLeadId?: TeamMember['userId'] }) {
+export function useShouldOpenChangeTeamLeadDialog(teamId?: Team['_id']) {
+  const searchParams = useSearchParams();
+  return searchParams.get("modal") === "change-team-lead" && (!teamId || searchParams.get("teamId") === teamId);
+}
+
+export function ChangeTeamLeadDialog({ children, open, onClose, teamId }: { children?: React.ReactNode, open: boolean, onClose: () => void, teamId: Team['_id'] }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  
-  const [open, setOpen] = useState(searchParams.get("modal") === "change-team-lead");
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleClose = () => {
-    setOpen(false);
+    onClose();
     setTimeout(() => setShowSuccess(false), 3000);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("modal");
-    router.replace(`${pathname}?${params.toString()}`);
+    handleUrlParams(false);
   };
 
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
+  const handleUrlParams = (isOpen: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
-
     if (isOpen) {
       params.set("modal", "change-team-lead");
-      setShowSuccess(false);
+      params.set("teamId", teamId);
     } else {
       params.delete("modal");
+      params.delete("teamId");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
       setShowSuccess(false);
     }
+    handleUrlParams(isOpen);
+  }
 
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+  const handleUrlParamsEffect = useEffectEvent(handleUrlParams);
+  useEffect(() => {
+    if (open) handleUrlParamsEffect(true);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -54,16 +65,17 @@ export function ChangeTeamLeadDialog({ children, teamId, initialTeamLeadId }: { 
           )}
         </DialogHeader>
 
-        {showSuccess ? (
-          <ChangeTeamLeadDialogSuccessState onClose={handleClose} />
-        ) : (
-          <ChangeTeamLeadDialogContent
-            teamId={teamId}
-            initialTeamLeadId={initialTeamLeadId}
-            onSuccess={() => setShowSuccess(true)}
-            onCancel={handleClose}
-          />
-        )}
+        {
+          showSuccess ? (
+            <ChangeTeamLeadDialogSuccessState onClose={handleClose} />
+          ) : (
+            <ChangeTeamLeadDialogContent
+              teamId={teamId}
+              onSuccess={() => setShowSuccess(true)}
+              onCancel={handleClose}
+            />
+          )
+        }
       </DialogContent>
     </Dialog>
   );
@@ -71,33 +83,29 @@ export function ChangeTeamLeadDialog({ children, teamId, initialTeamLeadId }: { 
 
 function ChangeTeamLeadDialogContent({
   teamId,
-  initialTeamLeadId,
   onSuccess,
   onCancel,
 }: {
   teamId: Team['_id'];
-  initialTeamLeadId?: TeamMember['userId'];
   onSuccess: () => void;
   onCancel: () => void;
 }) {
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
     teamId: teamId,
   });
+
   const changeTeamLeadMutation = useAccountMutation(api.team.changeTeamLead);
 
-  const [selectedTeamLeadId, setSelectedTeamLeadId] = useState<TeamMember['userId'] | undefined>(initialTeamLeadId);
+  const [selectedTeamLeadId, setSelectedTeamLeadId] = useState<TeamMember['userId'] | undefined>(undefined);
   const { isLoading: isSaving, runWithLoading: runWithSaving } = useWithLoading();
 
   if (!teamMembersQuery) {
-    return <ChangeTeamLeadDialogLoadingState />;
+    return <ChangeTeamLeadDialogSkeleton />;
   }
 
   if (teamMembersQuery?.error) {
     return <div>Error: {teamMembersQuery.error}</div>; // TODO: Show a proper error ui  
   }
-
-  const members = teamMembersQuery.data;
-  const hasChanges = selectedTeamLeadId !== initialTeamLeadId;
 
   const handleSave = async () => {
     const mutationBody: Record<string, string> = {
@@ -117,6 +125,10 @@ function ChangeTeamLeadDialogContent({
     });
   };
 
+  const members = teamMembersQuery.data;
+  const initialTeamLeadId = members.find((member) => member.role === "team_lead")?.userId;
+  const hasChanges = selectedTeamLeadId && selectedTeamLeadId !== initialTeamLeadId;
+
   return (
     <>
       <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
@@ -124,7 +136,7 @@ function ChangeTeamLeadDialogContent({
           <TeamMemberItem
             key={member._id}
             member={member}
-            selected={selectedTeamLeadId === member.userId}
+            selected={(selectedTeamLeadId ?? initialTeamLeadId) === member.userId}
             onClick={() => setSelectedTeamLeadId(member.userId)}
           />
         ))}
@@ -209,7 +221,7 @@ function ChangeTeamLeadDialogSuccessState({ onClose }: { onClose: () => void }) 
   );
 }
 
-function ChangeTeamLeadDialogLoadingState() {
+function ChangeTeamLeadDialogSkeleton() {
   return (
     <>
       <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">

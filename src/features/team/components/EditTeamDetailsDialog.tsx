@@ -6,45 +6,60 @@ import { useEditTeamForm } from "../hooks/useEditTeamForm";
 import { Team } from "@/features/team/types";
 import { api } from "@convex/_generated/api";
 import { useAccountQuery } from "@/features/account/useAccount";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function EditTeamDetailsDialog({ team }: { team: Team }) {
+export function useShouldOpenEditTeamDetailsDialog(teamSlug?: Team['slug']) {
+  const searchParams = useSearchParams();
+  return searchParams.get("modal") === "edit-team-details" && (!teamSlug || searchParams.get("team-slug") === teamSlug);
+}
+
+export function EditTeamDetailsDialog({
+  children,
+  team,
+  open,
+  onClose,
+}: {
+  children?: React.ReactNode,
+  team: Team,
+  open: boolean,
+  onClose: () => void,
+}) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
-  const [open, setOpen] = useState(searchParams.get("modal") === "edit-team-details");
+
+  const handleUrlParams = (isOpen: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isOpen) {
+      params.set("modal", "edit-team-details");
+      params.set("team-slug", team.slug);
+    } else {
+      params.delete("modal");
+      params.delete("team-slug");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  }
 
   const handleOpenChange = (open: boolean) => {
-    setOpen(open)
-    const params = new URLSearchParams(searchParams.toString())
-
-    if (open) {
-      params.set("modal", "edit-team-details")
-    } else {
-      params.delete("modal")
+    if (!open) {
+      onClose();
     }
-
-    router.replace(`${pathname}?${params.toString()}`)
+    handleUrlParams(open);
   }
 
   function handleClose() {
-    setOpen(false)
-    const params = new URLSearchParams(searchParams.toString())
-
-    params.delete("modal")
-    const newPathname = team.previous_slug ? pathname.replace(team.previous_slug, team.slug) : pathname;
-    router.replace(`${newPathname}?${params.toString()}`)
+    onClose();
+    handleUrlParams(false);
   }
+  
+  const handleUrlParamsEffect = useEffectEvent(handleUrlParams);
+  useEffect(() => {
+    if (open) handleUrlParamsEffect(true);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" className="border border-slate-300">
-          <EditIcon className="w-4 h-4" />
-          Edit Team Details
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Team Details</DialogTitle>
@@ -57,7 +72,7 @@ export function EditTeamDetailsDialog({ team }: { team: Team }) {
 }
 
 function EditTeamDetailsForm({ team, onClose }: { team: Team; onClose: () => void }) {
-  const { form, successData } = useEditTeamForm({ team });
+  const { form, successData, error } = useEditTeamForm({ team });
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
     teamId: team._id,
   });
@@ -95,6 +110,7 @@ function EditTeamDetailsForm({ team, onClose }: { team: Team; onClose: () => voi
       }}
       className="grid gap-4 py-4"
     >
+      {error && <div className="text-red-500 text-sm">{error}</div> /** TODO: Show a proper error ui */}
       <form.AppField name="name">
         {(field) => <field.TextField label="Name" placeholder="Enter a name for the team" />}
       </form.AppField>

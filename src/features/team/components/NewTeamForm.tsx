@@ -33,6 +33,12 @@ function NewTeamFormContent() {
           e.stopPropagation();
           form.handleSubmit();
         }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && step === "details") {
+            e.preventDefault();
+            setStep("members");
+          }
+        }}
       >
         <Activity mode={step === "details" ? "visible" : "hidden"}>
           <NewTeamFormDetailsStep form={form} defaultSlug={defaultSlug} setDefaultSlug={setDefaultSlug} nextStep={() => setStep("members")} />

@@ -9,27 +9,64 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { ROLES } from "@convex/utils/constants";
-import { PlusIcon, CheckCircle2, Copy, Check } from "lucide-react";
+import { CheckCircle2, Copy, Check } from "lucide-react";
 import { FieldGroup } from "@/components/ui/field";
 import { featureUnderDevelopment } from "@/lib/utils";
 import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/components/ui/copy";
 import { useNewUserForm } from "@/features/user/hooks/useNewUserForm";
+import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useEffectEvent } from "react";
 
-export function NewUserDialog() {
+export function useShouldOpenNewUserDialog() {
+  const searchParams = useSearchParams();
+  return searchParams.get("modal") === "new-user";
+}
+
+export function NewUserDialog({ 
+  children,
+  open,
+  onClose
+}: { 
+  children?: React.ReactNode,
+  open: boolean,
+  onClose: () => void
+}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const { form, successData, reset, error } = useNewUserForm()
 
+  const handleUrlParams = (isOpen: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isOpen) {
+      params.set("modal", "new-user");
+    } else {
+      params.delete("modal");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
+      setTimeout(reset, 100);
+    }
+    handleUrlParams(isOpen);
+  }
+
+  const handleUrlParamsEffect = useEffectEvent(handleUrlParams);
+  useEffect(() => {
+    if (open) handleUrlParamsEffect(true);
+  }, [open]);
+
   return (
-    <Dialog onOpenChange={(open) => {
-      if (!open) {
-        setTimeout(reset, 100);
-      }
-    }}>
-      <DialogTrigger asChild>
-        <Button variant="outline"><PlusIcon className="w-4 h-4" />New User</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {children}
       <DialogContent>
         {error && <div className="text-red-500 text-sm">{error}</div> /** TODO: Show a proper error ui */}
         {

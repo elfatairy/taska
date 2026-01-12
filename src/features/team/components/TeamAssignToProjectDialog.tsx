@@ -1,7 +1,7 @@
 "use client"
 
 import { Search } from "@/components/icons"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,21 +10,70 @@ import { api } from "@convex/_generated/api"
 import { Icon } from "@/components/Icon"
 import { getProjectIcon } from "@/features/project/utils/getProjectIcon"
 import { Minus, Plus } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import { Doc, Id } from "@convex/_generated/dataModel"
 import { useWithLoading } from "@/hooks/useWithLoading"
 import { Spinner } from "@/components/ui/spinner"
 import { TeamAssignToProjectDialogSkeleton } from "./TeamAssignToProjectDialogSkeleton"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 type Project = Doc<"projects">
 type TeamId = Id<"teams">
 
-export function TeamAssignToProjectDialog({ children, teamsIds }: { children: React.ReactNode, teamsIds: TeamId[] }) {
+export function useShouldOpenAssignToProjectDialog(teamsIds?: TeamId[]) {
+  const searchParams = useSearchParams();
+  return searchParams.get("modal") === "assign-to-project" && (!teamsIds || searchParams.get("teamsIds") === teamsIds.join(","));
+}
+
+export function TeamAssignToProjectDialog({
+  children,
+  open,
+  onClose,
+  teamsIds,
+}: {
+  children?: React.ReactNode,
+  open: boolean,
+  onClose: () => void, teamsIds: TeamId[] }) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  // TODO: implement success state
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const teamsIdsString = teamsIds.join(",")  
+  const handleUrlParams = (isOpen: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (isOpen) {
+      params.set("modal", "assign-to-project");
+      params.set("teamsIds", teamsIdsString);
+    } else {
+      params.delete("modal");
+      params.delete("teamsIds");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
+      setShowSuccess(false);
+    }
+    handleUrlParams(isOpen);
+  }
+
+  const handleUrlParamsEffect = useEffectEvent(handleUrlParams);
+  useEffect(() => {
+    if (open) handleUrlParamsEffect(true);
+  }, [open]);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {children}
       <DialogContent className="md:max-w-2xl" onClick={(e) => e.stopPropagation()}>
-        <DialogTitle className="sr-only">Assign to project</DialogTitle>
+        <DialogHeader className="sr-only">
+          <DialogTitle>Assign to project</DialogTitle>
+          <DialogDescription>Select a project to assign to the teams</DialogDescription>
+        </DialogHeader>
         <TeamAssignToProjectDialogContent teamsIds={teamsIds} />
       </DialogContent>
     </Dialog>
@@ -120,8 +169,8 @@ function TeamAssignToProjectDialogItem({ project, teamsIds, assignedTeamsCount }
   const containerClasses = isFullyAssigned
     ? "bg-primary/5 border-primary/30 hover:bg-primary/10 hover:border-primary/50"
     : isPartiallyAssigned
-    ? "bg-amber-50/50 border-amber-300/50 hover:bg-amber-100/50 hover:border-amber-400/50"
-    : "bg-background border-border hover:bg-accent hover:border-accent-foreground/20";
+      ? "bg-amber-50/50 border-amber-300/50 hover:bg-amber-100/50 hover:border-amber-400/50"
+      : "bg-background border-border hover:bg-accent hover:border-accent-foreground/20";
 
   return (
     <div
@@ -162,7 +211,7 @@ function TeamAssignToProjectDialogItem({ project, teamsIds, assignedTeamsCount }
             Assign{totalTeamsCount > 1 && ` All`}
           </Button>
         )}
-        
+
         {(isFullyAssigned || isPartiallyAssigned) && (
           <Button
             size="sm"
