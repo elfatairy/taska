@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, RowSelectionRow, RowSelectionState, useReactTable } from "@tanstack/react-table"
 import { useState } from "react"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
@@ -27,7 +27,7 @@ export function TeamsTable({
   const searchParams = useSearchParams();
   const queryResult = useAccountQuery(api.team.getTeams);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [rowSelection, setRowSelection] = useState({})
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
 
   const data = queryResult?.data || [];
 
@@ -48,12 +48,11 @@ export function TeamsTable({
     },
   })
 
-  const selectedTeamsIds = table.getSelectedRowModel().rows.map((row) => row.original._id);
   const initialOpenAssignToProjectDialog = useShouldOpenAssignToProjectDialog();
   const [openAssignToProjectDialog, setOpenAssignToProjectDialog] = useState(initialOpenAssignToProjectDialog);
+  const [assignToProjectTeamsIds, setAssignToProjectTeamsIds] = useState<Team['_id'][] | null>(searchParams.get("teamsIds")?.split(",") as Team['_id'][] ?? null);
   const initialOpenChangeTeamLeadDialog = useShouldOpenChangeTeamLeadDialog();
   const [openChangeTeamLeadDialog, setOpenChangeTeamLeadDialog] = useState(initialOpenChangeTeamLeadDialog);
-  const [assignToProjectTeamsIds, setAssignToProjectTeamsIds] = useState<Team['_id'][] | null>(searchParams.get("teamsIds")?.split(",") as Team['_id'][] ?? null);
   const [changeTeamLeadTeamId, setChangeTeamLeadTeamId] = useState<Team['_id'] | null>(searchParams.get("teamId") as Team['_id'] ?? null);
   const userRole = useUserRole();
 
@@ -64,6 +63,8 @@ export function TeamsTable({
   if (queryResult.error) {
     throw new Error(queryResult.error);
   }
+
+  const selectedTeamsIds = Object.keys(rowSelection).map((key) => data[Number(key)]._id);
 
   function handleOpenAssignToProjectDialog(teamsIds: Team['_id'][]) {
     setAssignToProjectTeamsIds(teamsIds);
@@ -96,6 +97,7 @@ export function TeamsTable({
           teamId={changeTeamLeadTeamId}
         />
       )}
+
       <div className="flex items-center justify-between p-4">
         <Input
           placeholder="Search by team name..."

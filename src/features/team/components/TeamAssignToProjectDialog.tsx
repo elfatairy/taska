@@ -1,5 +1,3 @@
-"use client"
-
 import { Search } from "@/components/icons"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -33,14 +31,15 @@ export function TeamAssignToProjectDialog({
 }: {
   children?: React.ReactNode,
   open: boolean,
-  onClose: () => void, teamsIds: TeamId[] }) {
+  onClose: () => void,
+  teamsIds: TeamId[]
+}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   // TODO: implement success state
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  const teamsIdsString = teamsIds.join(",")  
+  const teamsIdsString = teamsIds.join(",")
   const handleUrlParams = (isOpen: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
     if (isOpen) {
@@ -56,7 +55,6 @@ export function TeamAssignToProjectDialog({
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       onClose();
-      setShowSuccess(false);
     }
     handleUrlParams(isOpen);
   }
@@ -67,7 +65,7 @@ export function TeamAssignToProjectDialog({
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange} >
       {children}
       <DialogContent className="md:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogHeader className="sr-only">
