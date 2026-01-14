@@ -1,12 +1,12 @@
 'use client';
 
-import AppLogo from "@/components/AppLogo";
-import { Icon } from "@/components/Icon";
-import SearchBar from "@/components/SearchBar";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
-import NotificationTrigger from "@/features/notification/NotificationTrigger";
-import ProfileHeaderTrigger from "@/features/user/components/ProfileHeaderTrigger";
+import AppLogo from "@/common/components/AppLogo";
+import { Icon } from "@/common/components/Icon";
+import SearchBar from "@/common/components/SearchBar";
+import { Button } from "@/common/components/ui/button";
+import { useSidebar } from "@/common/components/ui/sidebar";
+import NotificationTrigger from "@/features/notification/components/NotificationTrigger";
+import ProfileHeaderTrigger from "@/features/profile/components/profile-dropdown/ProfileHeaderTrigger";
 
 export function DashboardHeader() {
   const { toggleSidebar } = useSidebar();

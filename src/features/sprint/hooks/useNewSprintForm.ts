@@ -1,13 +1,13 @@
 'use client'
 
-import { useAccountMutation } from "@/features/account/useAccount";
-import { useAppForm } from "@/hooks/form";
+import { useAccountMutation } from "@/common/hooks/useAccount";
+import { useAppForm } from "@/common/hooks/form";
 import { api } from "@convex/_generated/api";
 import { isFailure } from "@convex/utils/types";
 import { useState } from "react";
 import { z } from "zod";
-import { Id } from "@convex/_generated/dataModel";
 import { addDays } from "date-fns";
+import { ProjectId, SprintId, TeamId } from "@/common/types";
 
 const getErrorMessage = (error: string): string => {
   const errorMessages: Record<string, string> = {
@@ -32,9 +32,9 @@ const formSchema = z.object({
   duration: z.number(),
 })
 
-export function useNewSprintForm({ projectId }: { projectId: Id<"projects"> }) {
+export function useNewSprintForm({ projectId }: { projectId: ProjectId }) {
   const createSprint = useAccountMutation(api.sprint.createSprint);
-  const [successData, setSuccessData] = useState<{ sprintId: Id<"sprints"> } | null>(null);
+  const [successData, setSuccessData] = useState<{ sprintId: SprintId } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const form = useAppForm({
@@ -51,7 +51,7 @@ export function useNewSprintForm({ projectId }: { projectId: Id<"projects"> }) {
     onSubmit: async ({ value }) => {
       const createSprintArgs: Parameters<typeof createSprint>[0] = {
         projectId,
-        teamId: value.teamId as Id<"teams">,
+        teamId: value.teamId as TeamId,
         name: value.name,
         goal: value.goal,
         start_date: value.start_date!.getTime(),

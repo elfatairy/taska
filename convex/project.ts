@@ -5,7 +5,6 @@ import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
 import { vProjectStatus, vProjectType } from "@convex/schema";
-import { createClerkUser } from "./services/clerk";
 
 export const getProjectsByAccountId = internalQuery({
   args: {

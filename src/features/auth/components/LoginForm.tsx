@@ -1,10 +1,10 @@
 "use client";
 
-import { Google } from "@/components/icons";
-import Github from "@/components/icons/Github";
-import { OrSeparator } from "@/components/OrSeparator";
-import { Button } from "@/components/ui/button";
-import { FieldGroup } from "@/components/ui/field";
+import { Google } from "@/common/components/icons";
+import Github from "@/common/components/icons/Github";
+import { OrSeparator } from "@/common/components/OrSeparator";
+import { Button } from "@/common/components/ui/button";
+import { FieldGroup } from "@/common/components/ui/field";
 import { featureUnderDevelopment } from "@/lib/utils";
 import { useLoginForm } from "@/features/auth/hooks/useLoginForm";
 

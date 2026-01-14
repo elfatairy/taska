@@ -1,5 +1,5 @@
-import { ProjectBacklog } from "@/features/project/components/ProjectBacklog";
-import { AwaitParams } from "@/components/AwaitParams";
+import { ProjectBacklog } from "@/features/project/components/project-backlog/ProjectBacklog";
+import { AwaitParams } from "@/common/components/AwaitParams";
 
 export default function BacklogPage({ params }: PageProps<'/dashboard/projects/[projectSlug]/backlog'>) {
   return (
