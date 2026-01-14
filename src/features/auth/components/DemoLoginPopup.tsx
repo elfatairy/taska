@@ -1,38 +1,19 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle, CardHeader, CardContent, CardDescription } from "@/components/ui/card";
+import { Button } from "@/common/components/ui/button";
+import { Card, CardTitle, CardHeader, CardContent, CardDescription } from "@/common/components/ui/card";
 import { X, UserCog } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { useAccountAction } from "@/features/account/useAccount";
+import { useAccountAction } from "@/common/hooks/useAccount";
 import { api } from "@convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useClerk, useSignIn } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { Role } from "../types";
-import { cn, featureUnderDevelopment } from "@/lib/utils";
 import { tryCatch } from "@/lib/try-catch";
 import { isFailure } from "@convex/utils/types";
 
-const roles: Role[] = [
-  {
-    label: "CTO",
-    value: "CTO" as const
-  },
-  {
-    label: "Product Manager",
-    value: "Product Manager" as const,
-  },
-  {
-    label: "Team Lead",
-    value: "Team Lead" as const,
-    locked: true,
-  },
-  {
-    label: "Frontend Developer",
-    value: "Frontend Developer" as const,
-  }
-]
+const demoLoginRoles = ['CTO', 'Product Manager', 'Team Lead', 'Frontend Developer'] as const;
+type DemoLoginRole = typeof demoLoginRoles[number];
 
 export function DemoLoginPopup() {
   const [open, setOpen] = useState(false);
@@ -65,8 +46,8 @@ export function DemoLoginPopup() {
           </Button>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-2">
-          {roles.map((role) => (
-            <DemoLoginButton key={role.value} role={role} />
+          {demoLoginRoles.map((role) => (
+            <DemoLoginButton key={role} role={role} />
           ))}
         </CardContent>
       </Card>
@@ -74,28 +55,23 @@ export function DemoLoginPopup() {
   );
 }
 
-function DemoLoginButton({ role }: { role: Role }) {
+function DemoLoginButton({ role }: { role: DemoLoginRole }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const loginWithRole = useAccountAction(api.auth.loginWithRole);
   const { signIn, isLoaded } = useSignIn();
   const { setActive } = useClerk();
 
-  const handleRoleClick = async (role: Role) => {
+  const handleRoleClick = async (role: DemoLoginRole) => {
     if (!isLoaded) {
       toast.error("Authentication not ready. Please try again.");
-      return;
-    }
-
-    if (role.locked) {
-      featureUnderDevelopment();
       return;
     }
 
     startTransition(async () => {
       try {
         const loginWithRoleResult = await loginWithRole({
-          role: role.value
+          role: role
         });
 
         if (isFailure(loginWithRoleResult)) {
@@ -127,8 +103,8 @@ function DemoLoginButton({ role }: { role: Role }) {
   }
 
   return (
-    <Button variant="outline" className={cn(role.locked && "opacity-50")} onClick={() => handleRoleClick(role)}>
-      {isPending ? "Loading..." : role.label}
+    <Button variant="outline" onClick={() => handleRoleClick(role)}>
+      {isPending ? "Loading..." : role}
     </Button>
   );
 }

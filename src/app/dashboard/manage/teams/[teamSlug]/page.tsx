@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import TeamDetailsPageLoading from "./loading";
 import { useConvexAuth } from "convex/react";
 import { use } from "react";
-import { TeamDetails } from "@/features/team/components/TeamDetails";
+import { TeamDetails } from "@/features/team/components/team-details/TeamDetails";
 
 export default function ManageTeamPage({ params }: PageProps<'/dashboard/manage/teams/[teamSlug]'>) {
   const { teamSlug } = use(params);

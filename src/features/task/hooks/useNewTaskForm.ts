@@ -1,13 +1,13 @@
 'use client'
 
-import { useAccountMutation } from "@/features/account/useAccount";
-import { useAppForm } from "@/hooks/form";
+import { useAccountMutation } from "@/common/hooks/useAccount";
+import { useAppForm } from "@/common/hooks/form";
 import { api } from "@convex/_generated/api";
 import { isFailure } from "@convex/utils/types";
 import { useState } from "react";
 import { z } from "zod";
 import { TASK_PRIORITY, TASK_STATUS } from "@convex/utils/constants";
-import { Id } from "@convex/_generated/dataModel";
+import { ProjectId, TaskId, TeamId } from "@/common/types";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -18,9 +18,9 @@ const formSchema = z.object({
   estimate: z.number(),
 })
 
-export function useNewTaskForm({ projectId, status }: { projectId: Id<"projects">, status: typeof TASK_STATUS[number] }) {
+export function useNewTaskForm({ projectId, status }: { projectId: ProjectId, status: typeof TASK_STATUS[number] }) {
   const createTask = useAccountMutation(api.task.createTask);
-  const [successData, setSuccessData] = useState<{ taskId: Id<"tasks"> } | null>(null);
+  const [successData, setSuccessData] = useState<{ taskId: TaskId } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const form = useAppForm({
@@ -38,7 +38,7 @@ export function useNewTaskForm({ projectId, status }: { projectId: Id<"projects"
     onSubmit: async ({ value }) => {
       const createTaskArgs: Parameters<typeof createTask>[0] = {
         projectId,
-        teamId: value.teamId as Id<"teams">,
+        teamId: value.teamId as TeamId,
         title: value.title,
         description: value.description,
         status,

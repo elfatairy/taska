@@ -1,4 +1,4 @@
-import { ProjectsTableSkeleton } from "@/features/project/components/ProjectsTableSkeleton";
+import { ProjectsTableSkeleton } from "@/features/project/components/project-list/ProjectsTableSkeleton";
 
 export default function ProjectsPageLoading() {
   return (

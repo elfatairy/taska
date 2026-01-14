@@ -1,4 +1,4 @@
-import UnderDevelopment from "@/components/UnderDevelopment";
+import UnderDevelopment from "@/common/components/UnderDevelopment";
 
 export default function Dashboard() {
   return (

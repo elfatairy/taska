@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/common/components/ui/card";
 import { DemoLoginPopup } from "@/features/auth/components/DemoLoginPopup";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 

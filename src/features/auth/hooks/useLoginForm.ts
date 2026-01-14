@@ -1,9 +1,8 @@
-import { useAppForm } from "@/hooks/form";
+import { useAppForm } from "@/common/hooks/form";
 import { z } from "zod";
-import { useAccountAction } from "@/features/account/useAccount";
+import { useAccountAction } from "@/common/hooks/useAccount";
 import { api } from "@convex/_generated/api";
 import { tryCatch } from "@/lib/try-catch";
-import { toast } from "sonner";
 import { useSignIn } from "@clerk/nextjs";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -15,10 +14,10 @@ const loginSchema = z.object({
 });
 
 export function useLoginForm() {
-  const login = useAccountAction(api.auth.login);
+  const router = useRouter();
   const { signIn, isLoaded } = useSignIn();
   const { setActive } = useClerk();
-  const router = useRouter();
+  const login = useAccountAction(api.auth.login);
   const [error, setError] = useState<string | null>(null);
 
   const form = useAppForm({

@@ -1,7 +1,7 @@
 'use client'
 
-import { useAccountMutation } from "@/features/account/useAccount";
-import { useAppForm } from "@/hooks/form";
+import { useAccountMutation } from "@/common/hooks/useAccount";
+import { useAppForm } from "@/common/hooks/form";
 import { api } from "@convex/_generated/api";
 import { isFailure } from "@convex/utils/types";
 import { useState } from "react";

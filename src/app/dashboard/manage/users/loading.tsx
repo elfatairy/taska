@@ -1,4 +1,4 @@
-import { UsersTableSkeleton } from "@/features/user/components/UsersTableSkeleton";
+import { UsersTableSkeleton } from "@/features/user/components/user-list/UsersTableSkeleton";
 
 export default function UsersPageLoading() {
   return (

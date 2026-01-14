@@ -1,9 +1,9 @@
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/common/components/ui/sidebar";
 import { DashboardHeader } from "@/app/dashboard/_components/DashboardHeader";
-import { Sidebar } from "@/features/sidebar/components/Sidebar";
+import { Sidebar } from "@/common/layout/sidebar/components/Sidebar";
 import { MainSectionProvider } from "@/contexts/MainSectionContext";
 import DashboardWrapper from "./_components/DashboardWrapper";
-import AccessibilityLinks from "@/components/AccessibilityLinks";
+import AccessibilityLinks from "@/common/components/AccessibilityLinks";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,6 +1,6 @@
 import "convex/server";
 import { ROLES } from "@convex/utils/constants"
-import { Id } from "@convex/_generated/dataModel";
+import { UserId } from "@/common/types";
 
 declare global {
   interface CustomJwtSessionClaims {
@@ -14,6 +14,6 @@ declare global {
 declare module "convex/server" {
   interface UserIdentity {
     role?: (typeof ROLES)[number];
-    convexUserId: Id<"users">;
+    convexUserId: UserId;
   }
 }

@@ -1,4 +1,4 @@
-import { TeamsTableSkeleton } from "@/features/team/components/TeamsTableSkeleton";
+import { TeamsTableSkeleton } from "@/features/team/components/team-list/TeamsTableSkeleton";
 
 export default function TeamsPageLoading() {
   return (

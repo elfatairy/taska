@@ -1,7 +1,7 @@
-import { TeamDetailsLoading } from "@/features/team/components/TeamDetailsLoading";
+import { TeamDetailsSkeleton } from "@/features/team/components/team-details/TeamDetailsSkeleton";
 
 export default function TeamDetailsPageLoading() {
   return (
-    <TeamDetailsLoading />
+    <TeamDetailsSkeleton />
   );
 }

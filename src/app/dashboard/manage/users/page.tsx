@@ -1,11 +1,11 @@
 "use client"
 
-import { usersTableColumns } from "@/features/user/components/UsersTableColumns";
-import { UsersTable } from "@/features/user/components/UsersTable";
+import { usersTableColumns } from "@/features/user/components/user-list/UsersTableColumns";
+import { UsersTable } from "@/features/user/components/user-list/UsersTable";
 import { useConvexAuth } from "convex/react";
 import UsersPageLoading from "./loading";
 import { redirect } from "next/navigation";
-import { Block } from "@/features/layout/components/Block";
+import { Block } from "@/common/layout/Block";
 
 export default function UsersPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();

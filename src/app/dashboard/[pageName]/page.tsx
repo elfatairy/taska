@@ -1,4 +1,4 @@
-import UnderDevelopment from "@/components/UnderDevelopment";
+import UnderDevelopment from "@/common/components/UnderDevelopment";
 
 export async function generateStaticParams() {
   return [
@@ -12,7 +12,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function DashboardPage({ params }: PageProps<'/dashboard/[pageName]'>) {
+export default function DashboardPage() {
   return (
     <div className="h-full flex items-center justify-center pb-16">
       <UnderDevelopment />
