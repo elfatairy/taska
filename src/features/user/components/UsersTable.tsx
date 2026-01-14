@@ -7,12 +7,12 @@ import { useState } from "react"
 import { NewUserDialog } from "./NewUserDialog"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { User } from "./UsersTableColumns"
 import { UsersTableSkeleton } from "./UsersTableSkeleton"
 import { useRouter } from "next/navigation"
 import { useShouldOpenNewUserDialog } from "./NewUserDialog"
 import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
+import { User } from "@/common/types"
 
 interface UsersTableProps {
   columns: ColumnDef<User>[]

@@ -2,11 +2,11 @@
 
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, RowSelectionRow, RowSelectionState, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, RowSelectionState, useReactTable } from "@tanstack/react-table"
 import { useState } from "react"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { Team } from "@/features/team/types"
+import type { TeamDetail } from "@/features/team/types"
 import { TeamsTableSkeleton } from "@/features/team/components/TeamsTableSkeleton"
 import { useRouter, useSearchParams } from "next/navigation"
 import { TeamAssignToProjectDialog, useShouldOpenAssignToProjectDialog } from "./TeamAssignToProjectDialog"
@@ -15,9 +15,10 @@ import Link from "next/link"
 import { PlusIcon } from "lucide-react"
 import { ChangeTeamLeadDialog, useShouldOpenChangeTeamLeadDialog } from "./ChangeTeamLeadDialog"
 import { useUserRole } from "@/hooks/useUserRole"
+import type { TeamId } from "@/common/types"
 
 interface TeamsTableProps {
-  columns: ColumnDef<Team>[]
+  columns: ColumnDef<TeamDetail>[]
 }
 
 export function TeamsTable({
@@ -50,10 +51,10 @@ export function TeamsTable({
 
   const initialOpenAssignToProjectDialog = useShouldOpenAssignToProjectDialog();
   const [openAssignToProjectDialog, setOpenAssignToProjectDialog] = useState(initialOpenAssignToProjectDialog);
-  const [assignToProjectTeamsIds, setAssignToProjectTeamsIds] = useState<Team['_id'][] | null>(searchParams.get("teamsIds")?.split(",") as Team['_id'][] ?? null);
+  const [assignToProjectTeamsIds, setAssignToProjectTeamsIds] = useState<TeamId[] | null>(searchParams.get("teamsIds")?.split(",") as TeamId[] ?? null);
   const initialOpenChangeTeamLeadDialog = useShouldOpenChangeTeamLeadDialog();
   const [openChangeTeamLeadDialog, setOpenChangeTeamLeadDialog] = useState(initialOpenChangeTeamLeadDialog);
-  const [changeTeamLeadTeamId, setChangeTeamLeadTeamId] = useState<Team['_id'] | null>(searchParams.get("teamId") as Team['_id'] ?? null);
+  const [changeTeamLeadTeamId, setChangeTeamLeadTeamId] = useState<TeamId | null>(searchParams.get("teamId") as TeamId ?? null);
   const userRole = useUserRole();
 
   if (!queryResult) {
@@ -66,7 +67,7 @@ export function TeamsTable({
 
   const selectedTeamsIds = Object.keys(rowSelection).map((key) => data[Number(key)]._id);
 
-  function handleOpenAssignToProjectDialog(teamsIds: Team['_id'][]) {
+  function handleOpenAssignToProjectDialog(teamsIds: TeamId[]) {
     setAssignToProjectTeamsIds(teamsIds);
     setOpenAssignToProjectDialog(true);
   }
@@ -74,7 +75,7 @@ export function TeamsTable({
     setAssignToProjectTeamsIds(null);
     setOpenAssignToProjectDialog(false);
   }
-  function handleOpenChangeTeamLeadDialog(teamId: Team['_id']) {
+  function handleOpenChangeTeamLeadDialog(teamId: TeamId) {
     setChangeTeamLeadTeamId(teamId);
     setOpenChangeTeamLeadDialog(true);
   }

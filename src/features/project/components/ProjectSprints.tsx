@@ -4,8 +4,9 @@ import { useAccountQuery } from "@/features/account/useAccount";
 import { NewSprintDialog, useShouldOpenNewSprintDialog } from "@/features/sprint/components/NewSprintDialog";
 import { api } from "@convex/_generated/api";
 import { useState } from "react";
-import { Project } from "../types";
+import type { Project } from "@/common/types";
 import { Button } from "@/components/ui/button";
+import { ProjectSprintsHeader } from "./ProjectSprintsHeader";
 
 export function ProjectSprints({ projectSlug }: { projectSlug: string }) {
   const projectQuery = useAccountQuery(api.project.getProjectBySlug, {
@@ -36,7 +37,9 @@ function ProjectSprintsContent({ project }: { project: Project }) {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-2 p-6">
+      <ProjectSprintsHeader projectSlug={project.slug} />
+
       <NewSprintDialog
         open={openNewSprintDialog}
         onClose={handleCloseNewSprintDialog}

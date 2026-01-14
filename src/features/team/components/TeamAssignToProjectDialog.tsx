@@ -9,14 +9,11 @@ import { Icon } from "@/components/Icon"
 import { getProjectIcon } from "@/features/project/utils/getProjectIcon"
 import { Minus, Plus } from "lucide-react"
 import { useEffect, useEffectEvent, useState } from "react"
-import { Doc, Id } from "@convex/_generated/dataModel"
 import { useWithLoading } from "@/hooks/useWithLoading"
 import { Spinner } from "@/components/ui/spinner"
 import { TeamAssignToProjectDialogSkeleton } from "./TeamAssignToProjectDialogSkeleton"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-
-type Project = Doc<"projects">
-type TeamId = Id<"teams">
+import { Project, TeamId } from "@/common/types"
 
 export function useShouldOpenAssignToProjectDialog(teamsIds?: TeamId[]) {
   const searchParams = useSearchParams();

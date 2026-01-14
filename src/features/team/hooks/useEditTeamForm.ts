@@ -6,8 +6,7 @@ import { api } from "@convex/_generated/api";
 import { isFailure } from "@convex/utils/types";
 import { useState } from "react";
 import { z } from "zod";
-import { Team } from "@/features/team/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { TeamDetail } from "@/features/team/types";
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -16,11 +15,8 @@ const formSchema = z.object({
   teamLeadId: z.string().nullable(),
 })
 
-export function useEditTeamForm({ team }: { team: Team }) {
+export function useEditTeamForm({ team }: { team: TeamDetail }) {
   const updateTeam = useAccountMutation(api.team.updateTeam);
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
   const [successData, setSuccessData] = useState<{ success: boolean } | null>(null);
   const [error, setError] = useState<string | null>();
 

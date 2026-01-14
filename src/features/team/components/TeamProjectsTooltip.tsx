@@ -3,15 +3,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAccountQuery } from "@/features/account/useAccount";
-import type { Team } from "@/features/team/components/TeamsTableColumns";
 import { TeamProjectsTooltipSkeleton } from "@/features/team/components/TeamProjectsTooltipSkeleton";
 import { api } from "@convex/_generated/api";
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { getProjectIcon } from "@/features/project/utils/getProjectIcon";
+import { TeamId, TeamWithProjects } from "@/common/types/team";
 
-export default function TeamProjectsTooltip({ team }: { team: Team }) {
+export default function TeamProjectsTooltip({ team }: { team: TeamWithProjects }) {
   const projectCount = team.projectIds?.length || 0
   const [hasBeenOpened, setHasBeenOpened] = useState(false)
 
@@ -36,7 +36,7 @@ export default function TeamProjectsTooltip({ team }: { team: Team }) {
   )
 }
 
-function TeamProjectsTooltipContent({ teamId, projectCount }: { teamId: Team['_id'], projectCount: number }) {
+function TeamProjectsTooltipContent({ teamId, projectCount }: { teamId: TeamId, projectCount: number }) {
   const teamProjectsQuery = useAccountQuery(api.team.getTeamProjects, { teamId })
 
   const toolTipClassName = "w-80 p-2 bg-white border-gray-200 shadow-lg"

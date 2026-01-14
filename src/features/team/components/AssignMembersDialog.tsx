@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { CheckCircle2, Circle, PlusIcon, Search, X } from "lucide-react"
-import { Team } from "../types"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { CheckCircle2, Circle, Search, X } from "lucide-react"
 import { DialogDescription } from "@radix-ui/react-dialog"
 import { useAccountMutation, useAccountQuery } from "@/features/account/useAccount"
 import { api } from "@convex/_generated/api"
@@ -18,13 +17,14 @@ import { useRouter } from "next/navigation"
 import { useWithLoading } from "@/hooks/useWithLoading"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TeamId } from "@/common/types"
 
-export function useShouldOpenAssignMembersDialog(teamId?: Team['_id']) {
+export function useShouldOpenAssignMembersDialog(teamId?: TeamId) {
   const searchParams = useSearchParams();
   return searchParams.get("modal") === "assign-members" && (!teamId || searchParams.get("teamId") === teamId);
 }
 
-export function AssignMembersDialog({ open, onClose, teamId }: { open: boolean, onClose: () => void, teamId: Team['_id'] }) {
+export function AssignMembersDialog({ open, onClose, teamId }: { open: boolean, onClose: () => void, teamId: TeamId }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -83,7 +83,7 @@ export function AssignMembersDialog({ open, onClose, teamId }: { open: boolean, 
   )
 }
 
-function AssignMembersDialogContent({ teamId, onSuccess, onCancel }: { teamId: Team['_id'], onSuccess: () => void, onCancel: () => void }) {
+function AssignMembersDialogContent({ teamId, onSuccess, onCancel }: { teamId: TeamId, onSuccess: () => void, onCancel: () => void }) {
   const usersQuery = useAccountQuery(api.user.getUsers);
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
     teamId: teamId,

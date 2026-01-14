@@ -6,7 +6,8 @@ import { Check, Copy, MoreHorizontal, PlusIcon } from "lucide-react";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { Team, TeamLead, TeamMember, TeamProject } from "@/features/team/types";
+import type { TeamDetail, TeamMemberDetail, TeamProjectDetail } from "@/features/team/types";
+import type { User, TeamId } from "@/common/types";
 import { CopyCopied, CopyToClipboard } from "@/components/ui/copy";
 import { CopyUncopied } from "@/components/ui/copy";
 import { getProjectIcon } from "@/features/project/utils/getProjectIcon";
@@ -52,7 +53,7 @@ export function TeamDetails({ teamSlug }: { teamSlug: string }) {
   )
 }
 
-function TeamDetailsMembersCard({ teamId }: { teamId: Team['_id'] }) {
+function TeamDetailsMembersCard({ teamId }: { teamId: TeamId }) {
   const initialOpenAssignMembersDialog = useShouldOpenAssignMembersDialog(teamId);
   const [openAssignMembersDialog, setOpenAssignMembersDialog] = useState(initialOpenAssignMembersDialog);
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
@@ -109,7 +110,7 @@ function TeamDetailsMembersCard({ teamId }: { teamId: Team['_id'] }) {
   )
 }
 
-function TeamDetailsMemberItem({ member }: { member: TeamMember }) {
+function TeamDetailsMemberItem({ member }: { member: TeamMemberDetail }) {
   const unassignFromTeamMutation = useAccountMutation(api.team.removeTeamMember);
   const changeTeamLeadMutation = useAccountMutation(api.team.changeTeamLead);
   const { isLoading: isUnassigningLoading, runWithLoading: runWithUnassigningLoading } = useWithLoading();
@@ -203,7 +204,7 @@ function TeamDetailsMemberItem({ member }: { member: TeamMember }) {
   )
 }
 
-function TeamDetailsProjectsCard({ teamId }: { teamId: Team['_id'] }) {
+function TeamDetailsProjectsCard({ teamId }: { teamId: TeamId }) {
   const initialOpenAssignToProjectDialog = useShouldOpenAssignToProjectDialog([teamId]);
   const [openAssignToProjectDialog, setOpenAssignToProjectDialog] = useState(initialOpenAssignToProjectDialog);
   const teamProjectsQuery = useAccountQuery(api.team.getTeamProjects, {
@@ -270,7 +271,7 @@ function TeamDetailsProjectsCard({ teamId }: { teamId: Team['_id'] }) {
   )
 }
 
-function TeamDetailsProjectItem({ teamProject, teamId }: { teamProject: TeamProject, teamId: Team['_id'] }) {
+function TeamDetailsProjectItem({ teamProject, teamId }: { teamProject: TeamProjectDetail, teamId: TeamId }) {
   const unassignFromProjectMutation = useAccountMutation(api.team.unassignTeamsFromProject);
   const { isLoading: isUnassigningLoading, runWithLoading: runWithUnassigningLoading } = useWithLoading();
 
@@ -332,7 +333,7 @@ function TeamDetailsProjectItem({ teamProject, teamId }: { teamProject: TeamProj
   )
 }
 
-function TeamDetailsAboutCard({ description, teamLead, teamId }: { description: string, teamLead: TeamLead | null, teamId: Team['_id'] }) {
+function TeamDetailsAboutCard({ description, teamLead, teamId }: { description: string, teamLead: User | null, teamId: TeamId }) {
   const initialOpenChangeTeamLeadDialog = useShouldOpenChangeTeamLeadDialog(teamId);
   const [openChangeTeamLeadDialog, setOpenChangeTeamLeadDialog] = useState(initialOpenChangeTeamLeadDialog);
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
@@ -404,7 +405,7 @@ function TeamDetailsAboutCard({ description, teamLead, teamId }: { description: 
   )
 }
 
-function TeamDetailsStatsCard({ team }: { team: Team }) {
+function TeamDetailsStatsCard({ team }: { team: TeamDetail }) {
   return (
     <Card>
       <CardHeader>

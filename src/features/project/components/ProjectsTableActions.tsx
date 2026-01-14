@@ -8,12 +8,11 @@ import { CopyUncopied, CopyCopied } from "@/components/ui/copy"
 import { Copy } from "lucide-react"
 import { Check } from "lucide-react"
 import { featureUnderDevelopment } from "@/lib/utils"
-import { Project } from "./ProjectsTableColumns"
 import { useUser } from "@clerk/nextjs"
 import { useUserRole } from "@/hooks/useUserRole"
 import { useRouter } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProjectId } from "../types"
+import { Project } from "@/common/types"
 
 export function ProjectsTableActions({ project, handleOpenProjectAssignTeamsDialog }: { project: Project, handleOpenProjectAssignTeamsDialog: () => void }) {
   const userRole = useUserRole();

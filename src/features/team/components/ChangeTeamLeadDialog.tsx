@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Team, TeamMember } from "@/features/team/types";
+import type { TeamId, TeamMemberWithUser, UserId } from "@/common/types";
 import { api } from "@convex/_generated/api";
 import { useAccountQuery, useAccountMutation } from "@/features/account/useAccount";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,12 +12,12 @@ import { toast } from "sonner";
 import { useWithLoading } from "@/hooks/useWithLoading";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function useShouldOpenChangeTeamLeadDialog(teamId?: Team['_id']) {
+export function useShouldOpenChangeTeamLeadDialog(teamId?: TeamId) {
   const searchParams = useSearchParams();
   return searchParams.get("modal") === "change-team-lead" && (!teamId || searchParams.get("teamId") === teamId);
 }
 
-export function ChangeTeamLeadDialog({ children, open, onClose, teamId }: { children?: React.ReactNode, open: boolean, onClose: () => void, teamId: Team['_id'] }) {
+export function ChangeTeamLeadDialog({ children, open, onClose, teamId }: { children?: React.ReactNode, open: boolean, onClose: () => void, teamId: TeamId }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -86,7 +86,7 @@ function ChangeTeamLeadDialogContent({
   onSuccess,
   onCancel,
 }: {
-  teamId: Team['_id'];
+  teamId: TeamId;
   onSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -96,7 +96,7 @@ function ChangeTeamLeadDialogContent({
 
   const changeTeamLeadMutation = useAccountMutation(api.team.changeTeamLead);
 
-  const [selectedTeamLeadId, setSelectedTeamLeadId] = useState<TeamMember['userId'] | undefined>(undefined);
+  const [selectedTeamLeadId, setSelectedTeamLeadId] = useState<UserId | undefined>(undefined);
   const { isLoading: isSaving, runWithLoading: runWithSaving } = useWithLoading();
 
   if (!teamMembersQuery) {
@@ -153,7 +153,7 @@ function ChangeTeamLeadDialogContent({
   );
 }
 
-function TeamMemberItem({ member, selected, onClick }: { member: TeamMember, selected: boolean, onClick: () => void }) {
+function TeamMemberItem({ member, selected, onClick }: { member: TeamMemberWithUser, selected: boolean, onClick: () => void }) {
   return (
     <div
       className={cn(

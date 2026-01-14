@@ -1,18 +1,18 @@
-import { Doc } from "@convex/_generated/dataModel";
+// Feature-specific extended types (matching API responses)
+// Import base types from @/common/types in components
+import type { Team, User, UserId, Project, ProjectId, TeamMember, TeamProject } from "@/common/types";
 
-export type Team = Doc<"teams"> & {
-  memberIds: Doc<"users">['_id'][],
-  teamLead: Doc<"users"> | null,
-  projectIds: Doc<"projects">['_id'][]
-}
+export type TeamDetail = Team & {
+  memberIds: UserId[];
+  teamLead: User | null;
+  projectIds: ProjectId[];
+};
 
-export type TeamMember = Doc<"team_members"> & {
-  user: Doc<"users">
-}
+export type TeamMemberDetail = TeamMember & {
+  user: User;
+};
 
-export type TeamProject = Doc<"team_projects"> & {
-  project: Doc<"projects">
-  productManager: Doc<"users"> | null
-}
-
-export type TeamLead = Doc<"users">
+export type TeamProjectDetail = TeamProject & {
+  project: Project;
+  productManager: User | null;
+};

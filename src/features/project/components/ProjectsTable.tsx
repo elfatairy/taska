@@ -6,7 +6,6 @@ import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFiltered
 import { useState } from "react"
 import { api } from "@convex/_generated/api"
 import { useAccountQuery } from "@/features/account/useAccount"
-import { Project } from "./ProjectsTableColumns"
 import { ProjectsTableSkeleton } from "./ProjectsTableSkeleton"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -14,10 +13,10 @@ import { PlusIcon } from "lucide-react"
 import Link from "next/link"
 import { useUserRole } from "@/hooks/useUserRole"
 import { ProjectAssignTeamsDialog, useShouldOpenProjectAssignTeamsDialog } from "./ProjectAssignTeamsDialog"
-import { ProjectId } from "../types"
+import { ProjectId, ProjectWithManager } from "@/common/types"
 
 interface ProjectsTableProps {
-  columns: ColumnDef<Project>[]
+  columns: ColumnDef<ProjectWithManager>[]
 }
 
 export function ProjectsTable({

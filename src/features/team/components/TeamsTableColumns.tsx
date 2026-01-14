@@ -11,10 +11,11 @@ import Link from "next/link"
 import TeamMembersTooltip from "./TeamMembersTooltip"
 import TeamProjectsTooltip from "./TeamProjectsTooltip"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { Team } from "@/features/team/types"
+import type { TeamDetail } from "@/features/team/types"
 import { useUserRole } from "@/hooks/useUserRole"
+import type { TeamId } from "@/common/types"
 
-export const teamsTableColumns: ColumnDef<Team>[] = [
+export const teamsTableColumns: ColumnDef<TeamDetail>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -97,8 +98,8 @@ export const teamsTableColumns: ColumnDef<Team>[] = [
     cell: ({ row, table }) => {
       const team = row.original
       const meta = table.options.meta as {
-        handleOpenAssignToProjectDialog: (teamsIds: Team['_id'][]) => void;
-        handleOpenChangeTeamLeadDialog: (teamId: Team['_id']) => void;
+        handleOpenAssignToProjectDialog: (teamsIds: TeamId[]) => void;
+        handleOpenChangeTeamLeadDialog: (teamId: TeamId) => void;
       }
       return (
         <TeamsTableActions
@@ -117,7 +118,7 @@ function TeamsTableActions({
   handleOpenAssignToProjectDialog,
   handleOpenChangeTeamLeadDialog,
 }: {
-  team: Team;
+  team: TeamDetail;
   handleOpenAssignToProjectDialog: () => void;
   handleOpenChangeTeamLeadDialog: () => void;
 }) {

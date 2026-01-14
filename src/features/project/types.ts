@@ -1,4 +1,4 @@
-import { Doc } from "@convex/_generated/dataModel";
+import type { Team, User, UserId, ProjectId } from "@/common/types";
 
 export const PROJECT_TYPES = [
   { label: "Desktop App", value: "desktop" } as const,
@@ -10,13 +10,8 @@ export const PROJECT_TYPES = [
   { label: "Other", value: "other" } as const,
 ];
 
-export type Project = Doc<"projects">
-
-// TODO: Think about cross feature importing
-export type Team = Doc<"teams"> & {
-  memberIds: Doc<"users">["_id"][];
-  teamLead: Doc<"users"> | null;
-  projectIds: Doc<"projects">["_id"][];
-}
-
-export type ProjectId = Project['_id']
+export type ProjectTeam = Team & {
+  memberIds: UserId[];
+  teamLead: User | null;
+  projectIds: ProjectId[];
+};

@@ -1,17 +1,18 @@
 "use client"
 
+import { TeamId } from "@/common/types";
+import { TeamWithMembers } from "@/common/types/team";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAccountQuery } from "@/features/account/useAccount";
-import type { Team } from "@/features/team/components/TeamsTableColumns";
 import { TeamMembersTooltipSkeleton } from "@/features/team/components/TeamMembersTooltipSkeleton";
 import { api } from "@convex/_generated/api";
 import { Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function TeamMembersTooltip({ team }: { team: Team }) {
+export default function TeamMembersTooltip({ team }: { team: TeamWithMembers }) {
   const memberCount = team.memberIds?.length || 0
   const [hasBeenOpened, setHasBeenOpened] = useState(false)
 
@@ -36,7 +37,7 @@ export default function TeamMembersTooltip({ team }: { team: Team }) {
   )
 }
 
-function TeamMembersTooltipContent({ teamId, memberCount }: { teamId: Team['_id'], memberCount: number }) {
+function TeamMembersTooltipContent({ teamId, memberCount }: { teamId: TeamId, memberCount: number }) {
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, { teamId })
 
   const toolTipClassName = "w-80 p-2 bg-white border-gray-200 shadow-lg"

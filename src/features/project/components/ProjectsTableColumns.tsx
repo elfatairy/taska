@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Doc } from "@convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
 import { getProjectIcon } from "../utils/getProjectIcon"
@@ -12,11 +11,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { formatDuration } from "../utils/formatDuration"
 import { ProjectsTableActions } from "./ProjectsTableActions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ProjectId } from "../types"
+import { ProjectId, ProjectWithManager } from "@/common/types"
 
-export type Project = Doc<"projects"> & { productManager: Doc<"users"> | null }
-
-export const projectsTableColumns: ColumnDef<Project>[] = [
+export const projectsTableColumns: ColumnDef<ProjectWithManager>[] = [
   {
     accessorKey: "name",
     header: "Name",

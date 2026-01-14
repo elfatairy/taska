@@ -1,17 +1,15 @@
 "use client"
 
+import { User } from "@/common/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/components/ui/copy"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn, featureUnderDevelopment } from "@/lib/utils"
-import { Doc } from "@convex/_generated/dataModel"
 import { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy, MoreHorizontal } from "lucide-react"
 
-export type User = Doc<"users">
-
-export const usersTableColumns: ColumnDef<Doc<"users">>[] = [
+export const usersTableColumns: ColumnDef<User>[] = [
   {
     accessorKey: "name_email",
     accessorFn: (row) => `${row.name} ${row.email}`,

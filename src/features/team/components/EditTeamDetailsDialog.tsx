@@ -1,15 +1,15 @@
-import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTitle, DialogHeader, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, EditIcon } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useEditTeamForm } from "../hooks/useEditTeamForm";
-import { Team } from "@/features/team/types";
+import type { TeamDetail } from "@/features/team/types";
 import { api } from "@convex/_generated/api";
 import { useAccountQuery } from "@/features/account/useAccount";
 import { useState, useEffect, useEffectEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function useShouldOpenEditTeamDetailsDialog(teamSlug?: Team['slug']) {
+export function useShouldOpenEditTeamDetailsDialog(teamSlug?: TeamDetail['slug']) {
   const searchParams = useSearchParams();
   return searchParams.get("modal") === "edit-team-details" && (!teamSlug || searchParams.get("team-slug") === teamSlug);
 }
@@ -21,7 +21,7 @@ export function EditTeamDetailsDialog({
   onClose,
 }: {
   children?: React.ReactNode,
-  team: Team,
+  team: TeamDetail,
   open: boolean,
   onClose: () => void,
 }) {
@@ -71,7 +71,7 @@ export function EditTeamDetailsDialog({
   );
 }
 
-function EditTeamDetailsForm({ team, onClose }: { team: Team; onClose: () => void }) {
+function EditTeamDetailsForm({ team, onClose }: { team: TeamDetail; onClose: () => void }) {
   const { form, successData, error } = useEditTeamForm({ team });
   const teamMembersQuery = useAccountQuery(api.team.getTeamMembers, {
     teamId: team._id,

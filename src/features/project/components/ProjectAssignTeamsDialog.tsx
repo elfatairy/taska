@@ -13,7 +13,8 @@ import { useWithLoading } from "@/hooks/useWithLoading"
 import { Spinner } from "@/components/ui/spinner"
 import { TeamAssignToProjectDialogSkeleton } from "./ProjectAssignTeamsDialogSkeleton"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import type { ProjectId, Team } from "@/features/project/types"
+import type { ProjectId } from "@/common/types"
+import type { ProjectTeam } from "@/features/project/types"
 
 export function useShouldOpenProjectAssignTeamsDialog(projectId?: ProjectId) {
   const searchParams = useSearchParams();
@@ -127,7 +128,7 @@ export function ProjectAssignTeamsDialogContent({ projectId }: { projectId: Proj
   )
 }
 
-function ProjectAssignTeamsDialogItem({ team, projectId, isAssigned }: { team: Team, projectId: ProjectId, isAssigned: boolean }) {
+function ProjectAssignTeamsDialogItem({ team, projectId, isAssigned }: { team: ProjectTeam, projectId: ProjectId, isAssigned: boolean }) {
   const assignToProjectMutation = useAccountMutation(api.team.assignTeamsToProject);
   const unassignFromProjectMutation = useAccountMutation(api.team.unassignTeamsFromProject);
   const { isLoading: isAssigningLoading, runWithLoading: runWithAssigningLoading } = useWithLoading();
