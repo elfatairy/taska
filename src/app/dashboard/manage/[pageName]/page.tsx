@@ -10,7 +10,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function DashboardPage({ params }: PageProps<'/dashboard/pages/[pageName]'>) {
+export default function DashboardPage({ params }: PageProps<'/dashboard/manage/[pageName]'>) {
   return (
     <div className="h-full flex items-center justify-center pb-16">
       <ParamAwait params={params} />
@@ -19,7 +19,7 @@ export default function DashboardPage({ params }: PageProps<'/dashboard/pages/[p
   )
 }
 
-async function ParamAwait({ params }: {params: PageProps<'/dashboard/pages/[pageName]'>['params']}) {
+async function ParamAwait({ params }: {params: PageProps<'/dashboard/manage/[pageName]'>['params']}) {
   await params
   return null
 }

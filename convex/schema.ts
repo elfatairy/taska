@@ -31,6 +31,7 @@ export default defineSchema({
   accounts: defineTable({
     accountToken: v.string(),
     isAnonymous: v.boolean(),
+    teamLeadId: v.optional(v.id("users")),
     deletedAt: v.optional(v.number()),
   }),
   users: defineTable({

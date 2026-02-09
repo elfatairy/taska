@@ -127,7 +127,7 @@ export const createUserService = internalMutation({
 export const initializeUsers = async (
   ctx: ActionCtx,
   accountId: Doc<"accounts">["_id"]
-) : Result<void> => {
+) : Result<Doc<"users">[]> => {
   const initialUsers = [
     {
       ...randomUser(),
@@ -140,7 +140,7 @@ export const initializeUsers = async (
     ...Array.from({ length: 9 }).map(() => randomUser()),
   ];
 
-  await Promise.all(
+  const createdUsers = await Promise.all(
     initialUsers.map(async (user) => {
       const createClerkUserResult = await createClerkUser({
         ...user,
@@ -159,10 +159,17 @@ export const initializeUsers = async (
         },
       });
       await setClerkConvexUserId(createClerkUserResult.data.id, createUserResult.data);
+      const createdUser = await ctx.runQuery(internal.user.getUserById, {
+        userId: createUserResult.data,
+      });
+      if (createdUser.error || !createdUser.data) {
+        return;
+      }
+      return createdUser.data;
     })
   );
 
-  return { data: undefined, error: null };
+  return { data: createdUsers.filter(user => user !== undefined), error: null };
 };
 
 export const createUser = action({
@@ -216,5 +223,15 @@ export const createUser = action({
     })
     await setClerkConvexUserId(clerkUser.id, createUserResult.data);
     return { data: password, error: null };
+  },
+});
+
+export const getUserById = internalQuery({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) : Result<Doc<"users"> | null, "UNEXPECTED_ERROR"> => {
+    const user = await ctx.db.get("users", args.userId);
+    return { data: user, error: null };
   },
 });

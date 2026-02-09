@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { ActionCtx, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
 import { internal } from "./_generated/api";
@@ -934,4 +934,149 @@ export const unassignTeamsFromProject = mutation({
 
     return { data: undefined, error: null };
   },
+});
+
+export const getTeamsByAccountId = internalQuery({
+  args: {
+    accountId: v.id("accounts"),
+  },
+  handler: async (ctx, args): Result<Doc<"teams">[]> => {
+    const teams = await ctx.db
+      .query("teams")
+      .filter((q) => q.eq(q.field("accountId"), args.accountId))
+      .collect();
+    return { data: teams, error: null };
+  }
+});
+
+export const getTeamMembersByTeamId = internalQuery({
+  args: {
+    teamId: v.id("teams"),
+  },
+  handler: async (ctx, args): Result<Doc<"users">[]> => {
+    const teamMembers = await ctx.db
+      .query("team_members")
+      .filter((q) => q.eq(q.field("teamId"), args.teamId))
+      .collect();
+    
+    const users = await Promise.all(
+      teamMembers.map(async (member) => {
+        return await ctx.db.get(member.userId);
+      })
+    );
+
+    return { data: users.filter((u) => u !== null) as Doc<"users">[], error: null };
+  }
+});
+
+export const initializeTeams = async (
+  ctx: ActionCtx,
+  accountId: Doc<"accounts">["_id"]
+): Result<{ demoTeamLeadId: Doc<"users">["_id"] }, "NO_USERS_FOUND"> => {
+  const now = Date.now();
+
+  // Get users to assign as team leads and members
+  const allUsersResult = await ctx.runQuery(internal.user.getUsersByAccountId, {
+    accountId: accountId,
+  });
+  if (allUsersResult.error || !allUsersResult.data?.length) {
+    return { data: null, error: "NO_USERS_FOUND" };
+  }
+
+  const allUsers = allUsersResult.data;
+  const developers = allUsers.filter(u => 
+    u.role === "Frontend Developer" || u.role === "Backend Developer"
+  );
+  const designers = allUsers.filter(u => u.role === "Designer");
+  const qaEngineers = allUsers.filter(u => u.role === "QA");
+  const devOps = allUsers.filter(u => u.role === "DevOps");
+
+  // Helper to get random users
+  const getRandomUsers = (users: typeof allUsers, count: number) => {
+    const shuffled = [...users].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(count, users.length));
+  };
+
+  const initialTeams = [
+    {
+      name: "Alpha Squad",
+      description: "Full-stack development team focused on building core product features with expertise in React, Node.js, and mobile technologies. This team handles end-to-end feature development from frontend to backend.",
+      slug: "alpha-squad",
+      team_lead_id: developers[0]?._id,
+      members: getRandomUsers([...developers, ...designers], 4).map(u => u._id),
+    },
+    {
+      name: "Beta Team",
+      description: "Specialized team dedicated to user experience, design systems, and frontend development. They focus on creating beautiful, accessible, and performant user interfaces across web and mobile platforms.",
+      slug: "beta-team",
+      team_lead_id: designers[0]?._id || developers[1]?._id,
+      members: getRandomUsers([...designers, ...developers], 4).map(u => u._id),
+    },
+    {
+      name: "Gamma Force",
+      description: "Backend and infrastructure team responsible for API development, database optimization, microservices architecture, and cloud infrastructure. They ensure scalability, reliability, and performance of all backend services.",
+      slug: "gamma-force",
+      team_lead_id: developers[2]?._id || developers[0]?._id,
+      members: getRandomUsers([...developers, ...devOps], 4).map(u => u._id),
+    },
+    {
+      name: "QA Warriors",
+      description: "Quality assurance team ensuring product excellence through comprehensive testing strategies including automated testing, manual testing, performance testing, and security testing. They maintain high quality standards across all releases.",
+      slug: "qa-warriors",
+      team_lead_id: qaEngineers[0]?._id || developers[0]?._id,
+      members: getRandomUsers([...qaEngineers, ...developers], 3).map(u => u._id),
+    },
+  ];
+
+  for (const team of initialTeams) {
+    const newTeam = {
+      name: team.name,
+      description: team.description,
+      slug: team.slug,
+      team_lead_id: team.team_lead_id,
+      accountId: accountId,
+      updatedAt: now,
+    } satisfies Omit<Doc<"teams">, "_id" | "_creationTime" | "previous_slug">;
+
+    await ctx.runMutation(internal.team.createTeamService, {
+      team: newTeam,
+      members: team.members,
+    });
+  }
+
+  return { data: {
+    demoTeamLeadId: developers[0]?._id,
+  }, error: null };
+};
+
+export const createTeamService = internalMutation({
+  args: {
+    team: v.object({
+      name: v.string(),
+      description: v.string(),
+      slug: v.string(),
+      team_lead_id: v.optional(v.id("users")),
+      accountId: v.id("accounts"),
+      updatedAt: v.number(),
+    }),
+    members: v.array(v.id("users")),
+  },
+  handler: async (ctx, args): Promise<Id<"teams">> => {
+    const teamId = await ctx.db.insert("teams", args.team);
+    
+    // Insert team members
+    await Promise.all(
+      args.members.map(async (memberId) => {
+        await ctx.db.insert("team_members", {
+          teamId,
+          userId: memberId,
+          role: memberId === args.team.team_lead_id ? "team_lead" : "member",
+          is_primary: false,
+          updatedAt: Date.now(),
+        });
+      })
+    );
+
+    return teamId;
+  }
 });

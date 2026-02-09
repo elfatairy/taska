@@ -386,3 +386,33 @@ export const initializeProjects = async (
 
   return { data: undefined, error: null };
 };
+
+export const assignTeamToProjectService = internalMutation({
+  args: {
+    teamId: v.id("teams"),
+    projectId: v.id("projects"),
+    assignedBy: v.id("users"),
+  },
+  handler: async (ctx, args): Result<void> => {
+    const alreadyAssigned = await ctx.db
+      .query("team_projects")
+      .filter((q) => q.eq(q.field("team_id"), args.teamId))
+      .filter((q) => q.eq(q.field("project_id"), args.projectId))
+      .filter((q) => q.eq(q.field("unassigned_at"), undefined))
+      .unique();
+    
+    if (alreadyAssigned) {
+      return { data: undefined, error: null };
+    }
+
+    await ctx.db.insert("team_projects", {
+      team_id: args.teamId,
+      project_id: args.projectId,
+      assigned_at: Date.now(),
+      assigned_by: args.assignedBy,
+      updated_at: Date.now(),
+    });
+
+    return { data: undefined, error: null };
+  }
+});

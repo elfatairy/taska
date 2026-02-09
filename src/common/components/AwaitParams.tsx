@@ -1,9 +1,8 @@
-import { AppRoutes, ParamMap } from "../../../.next/dev/types/routes";
 import { use } from "react";
 
-export function AwaitParams<Route extends AppRoutes, Params extends ParamMap[Route]>({ 
-  children, 
-  params 
+export function AwaitParams<Route extends string, Params extends Record<string, string>>({
+  children,
+  params
 }: {
   children: (params: Params) => React.ReactNode;
   params: Promise<Params>;

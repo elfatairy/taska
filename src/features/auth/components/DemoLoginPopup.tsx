@@ -76,6 +76,10 @@ function DemoLoginButton({ role }: { role: DemoLoginRole }) {
 
         if (isFailure(loginWithRoleResult)) {
           console.error(loginWithRoleResult.error);
+          if (loginWithRoleResult.error === "TEAM_LEAD_NOT_FOUND") {
+            toast.error("The demo team lead was removed from the account.");
+            return;
+          }
           toast.error("Failed to login");
           return;
         }

@@ -5,6 +5,9 @@ import { internal } from "@convex/_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
 import { initializeProjects } from "./project";
+import { initializeTeams } from "./team";
+import { initializeSprints } from "./sprint";
+import { initializeTasks } from "./task";
 
 // TODO: Setup a CRON job to delete data after inactive 3 months
 
@@ -38,6 +41,21 @@ export const createAccount = internalMutation({
   }
 })
 
+export const setDemoTeamLead = internalMutation({
+  args: {
+    accountId: v.id("accounts"),
+    demoTeamLeadId: v.id("users"),
+  },
+  handler: async (ctx, args): Result<void, "ACCOUNT_NOT_FOUND"> => {
+    const account = await ctx.db.get("accounts", args.accountId);
+    if (!account) {
+      return { data: null, error: "ACCOUNT_NOT_FOUND" };
+    }
+    await ctx.db.patch(args.accountId, { teamLeadId: args.demoTeamLeadId });
+    return { data: undefined, error: null };
+  },
+})
+
 export const initializeAccount = action({
   args: {
     accountToken: v.string(),
@@ -57,6 +75,15 @@ export const initializeAccount = action({
 
     await initializeUsers(ctx, result.data!);
     await initializeProjects(ctx, result.data!);
+    const initializeTeamsResult = await initializeTeams(ctx, result.data!);
+    if (!initializeTeamsResult.error && initializeTeamsResult.data.demoTeamLeadId) {
+      await ctx.runMutation(internal.account.setDemoTeamLead, {
+        accountId: result.data!,
+        demoTeamLeadId: initializeTeamsResult.data.demoTeamLeadId,
+      });
+    }
+    await initializeSprints(ctx, result.data!);
+    await initializeTasks(ctx, result.data!);
     
     return { data: undefined, error: null };
   }

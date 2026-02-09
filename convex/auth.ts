@@ -18,12 +18,25 @@ export const getUsersByRole = internalQuery({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED"> => {
+  handler: async (ctx, args) : Result<Doc<"users">[], "NOT_AUTHENTICATED" | "TEAM_LEAD_NOT_FOUND"> => {
     const { data: account } = await ctx.runQuery(internal.account.getAccountByToken, {
       accountToken: args.accountToken,
     });
     if (!account) {
       return { data: null, error: "NOT_AUTHENTICATED" };
+      // return { data: null, error: args.accountToken as unknown as "NOT_AUTHENTICATED" };
+    }
+
+    // TODO: Check if team lead exists
+    if (args.role === "Team Lead") {
+      if (!account.teamLeadId) {
+        return { data: null, error: "TEAM_LEAD_NOT_FOUND" };
+      }
+      const user = await ctx.db.get("users", account.teamLeadId)
+      if (!user) {
+        return { data: null, error: "TEAM_LEAD_NOT_FOUND" };
+      }
+      return { data: [user], error: null };
     }
 
     const users: Doc<"users">[] = await ctx.db
@@ -71,7 +84,7 @@ export const loginWithRole = action({
     role: vLoginRole,
     accountToken: v.string(),
   },
-  handler: async (ctx, args) : Result<{ token: string }, "NOT_AUTHENTICATED" | "ROLE_NOT_FOUND_IN_ACCOUNT" | "UNEXPECTED_ERROR"> => {
+  handler: async (ctx, args) : Result<{ token: string }, "NOT_AUTHENTICATED" | "ROLE_NOT_FOUND_IN_ACCOUNT" | "UNEXPECTED_ERROR" | "TEAM_LEAD_NOT_FOUND"> => {
     const { data: users, error: usersError } = await ctx.runQuery(internal.auth.getUsersByRole, {
       role: args.role,
       accountToken: args.accountToken,
