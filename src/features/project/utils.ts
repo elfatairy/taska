@@ -44,6 +44,10 @@ export const getStatusBadgeVariant = (status: string) => {
   }
 }
 
+export const formatPriorityText = (priority: string) => {
+  return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()
+}
+
 export const formatStatusText = (status: string) => {
-  return status.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+  return status.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ")
 }

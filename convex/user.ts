@@ -172,6 +172,25 @@ export const initializeUsers = async (
   return { data: createdUsers.filter(user => user !== undefined), error: null };
 };
 
+export const getUserTeams = internalQuery({
+  args: {
+    userId: v.id("users"),
+    accountId: v.id("accounts"),
+  },
+  handler: async (ctx, args) : Result<Doc<"teams">[], "UNEXPECTED_ERROR"> => {
+    const teamMembers = await ctx.db
+      .query("team_members")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+    const teams = await Promise.all(
+      teamMembers.map(async (member) => {
+        return await ctx.db.get(member.teamId);
+      })
+    );
+    return { data: teams.filter(team => team !== undefined) as Doc<"teams">[], error: null };
+  },
+});
+
 export const createUser = action({
   args: {
     accountToken: v.string(),

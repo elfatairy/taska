@@ -9,3 +9,15 @@ export function cn(...inputs: ClassValue[]) {
 export function featureUnderDevelopment() {
   toast.info("This feature is still under development")
 }
+
+export function formatTimestamp(timestamp: number) {
+  const date = new Date(timestamp)
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+}

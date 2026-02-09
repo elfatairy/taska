@@ -1,10 +1,12 @@
 import { v } from "convex/values";
-import { ActionCtx, internalMutation, mutation } from "./_generated/server";
+import { ActionCtx, internalMutation, mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { Result } from "./utils/types";
 import { internal } from "./_generated/api";
-import { requireRole } from "./utils/auth";
+import { getUserIdentity, requireRole } from "./utils/auth";
 import { vTaskPriority, vTaskStatus } from "./schema";
+import { Task } from "@/common/types";
+import { filter } from "convex-helpers/server/filter";
 
 export const createTask = mutation({
   args: {
@@ -303,5 +305,66 @@ export const createTaskService = internalMutation({
   handler: async (ctx, args): Promise<Id<"tasks">> => {
     const taskId = await ctx.db.insert("tasks", args.task);
     return taskId;
+  }
+});
+
+export const getTasksByProjectId = query({
+  args: {
+    accountToken: v.string(),
+    projectId: v.id("projects"),
+    filters: v.optional(v.object({
+      status: v.optional(v.array(vTaskStatus)),
+    })),
+  },
+  handler: async (ctx, args): Result<Task[], "NOT_AUTHENTICATED" | "NOT_AUTHORIZED" | "PROJECT_NOT_FOUND" | "UNEXPECTED_ERROR"> => {
+    const { data: account } = await ctx.runQuery(
+      internal.account.getAccountByToken,
+      {
+        accountToken: args.accountToken,
+      }
+    );
+    if (!account) {
+      return { data: null, error: "NOT_AUTHENTICATED" };
+    }
+
+    const project = await ctx.db
+      .query("projects")
+      .filter((q) => q.eq(q.field("_id"), args.projectId))
+      .filter((q) => q.eq(q.field("accountId"), account._id))
+      .unique();
+    if (!project) {
+      return { data: null, error: "PROJECT_NOT_FOUND" };
+    }
+
+    const { data: identity, error: identityError } = await getUserIdentity(ctx);
+    if (identityError) {
+      return { data: null, error: identityError };
+    }
+
+    if (identity.role === "Product Manager" && project.productManagerId !== identity.convexUserId) {
+      return { data: null, error: "NOT_AUTHORIZED" };
+    }
+
+    let tasksQuery = filter(
+      ctx.db.query("tasks"),
+      (task) => task.project_id === args.projectId && (args.filters?.status?.includes(task.status) ?? true)
+    );
+
+    if (!['CTO', 'Product Manager'].includes(identity.role ?? "")) {
+      const userTeams = await ctx.runQuery(internal.user.getUserTeams, {
+        userId: identity.convexUserId,
+        accountId: account._id,
+      });
+      if (userTeams.error) {
+        return { data: null, error: userTeams.error };
+      }
+      const userTeamsIds = userTeams.data?.map(team => team._id);
+      tasksQuery = filter(
+        tasksQuery,
+        (task) => userTeamsIds?.includes(task.team_id)
+      )
+    }
+    const tasks = await tasksQuery.collect();
+    return { data: tasks, error: null };
   }
 });
