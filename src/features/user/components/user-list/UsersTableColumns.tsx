@@ -1,7 +1,6 @@
 "use client"
 
 import { User } from "@/common/types"
-import { Avatar, AvatarFallback, AvatarImage } from "@/common/components/ui/avatar"
 import { Button } from "@/common/components/ui/button"
 import { CopyCopied, CopyToClipboard, CopyUncopied } from "@/common/components/ui/copy"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/common/components/ui/dropdown-menu"
